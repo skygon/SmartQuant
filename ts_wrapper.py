@@ -10,15 +10,18 @@ class TsWrapper(object):
     def setCode(self, new_code):
         self.code = new_code
     
-    def get_current_deals(self):
+    def get_today_deals(self):
         df = ts.get_today_ticks(self.code)
         return df
+    
+    def get_hist_day_data(self):
+        
 
 
 
 if __name__ == "__main__":
     tw = TsWrapper('603993')
-    df = tw.get_current_deals()
+    df = tw.get_today_deals()
     print df.shape
     print df.head(20)
     
