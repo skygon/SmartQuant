@@ -1,5 +1,6 @@
 #coding=utf-8
 import os
+from utils import Utils
 import tushare as ts
 
 
@@ -20,7 +21,7 @@ class TsWrapper(object):
             df = ts.get_k_data(self.code, ktype='D')
             file_name = self.code + '_hist_d.csv'
             full_path = os.path.join(self.hist_day_data_path, file_name)
-            df.to_csv(full_path, encoding='utf-8')
+            Utils.save2CSVFile(df, full_path)
         except Exception, e:
             print "get_hist_day_data failed: %s" %(str(e))
 
@@ -28,12 +29,6 @@ class TsWrapper(object):
 
 
 if __name__ == "__main__":
-    tw = TsWrapper('603993')
-    df = tw.get_today_deals()
-    print df.shape
-    print df.head(20)
-    
-    s = df.iloc[1,6]
-    print type(s)
-    #print s
-    df.to_csv('data.csv', encoding='utf-8')
+    #tw = TsWrapper('603993')
+    tw = TsWrapper('000001')
+    tw.get_hist_day_data()
