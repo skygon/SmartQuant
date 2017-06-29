@@ -16,7 +16,27 @@ class Tutorial(object):
         print df.code.iloc[0]
         #print u'603933' == '603933'
         print df[df['code'].isin(['603933', '603993'])]
+    
+    def parseSZ50(self):
+        full_path = os.path.join(self.path, 'config', 'sz50.csv')
+        df = DataFrame.from_csv(full_path)
+        print df.code
+        print df[df.code.isin([600016,'600028'])]
+        #print df[df.code.isin(['600016','600028'])]
+    
+    def parseHS300(self):
+        full_path = os.path.join(self.path, 'config', 'hs300.csv')
+        df = DataFrame.from_csv(full_path)
+        #print df.code
+        print df[df.code.isin([600016,'600028'])]
+
+    def parseZZ500(self):
+        full_path = os.path.join(self.path, 'config', 'zz500.csv')
+        df = DataFrame.from_csv(full_path)
+        print df.code
+        print df[df.code.isin([600993, '002277'])]
 
 if __name__ == "__main__":
     t = Tutorial()
-    t.parseStockBasics()
+    #t.parseStockBasics()
+    t.parseZZ500()
