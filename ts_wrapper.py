@@ -40,13 +40,24 @@ class TsWrapper(object):
         df = DataFrame.from_csv(full_path)
         last_frame = df.tail(1)
         date_string = last_frame.iloc[0,0] # date is the first cell of on row
-        with open(full_path, 'a') as f:
-            df = ts.get_k_data(self.code, ktype='D', start=date_string)
-            delta_df = df[1:] # first row is duplicated. skip it
-            delta_df.to_csv(f)
+        offset = df.shape[0]
+        print "offset is %s" %(offset)
+        
+        with open(full_path, 'w') as f:
+            new_df = ts.get_k_data(self.code, ktype='D', start=date_string)
+            delta_df = new_df[1:] # first row is duplicated. skip it
+            print delta_df.shape
+            delta_len = delta_df.shape[0]
+            print "delta len is %s" %(delta_len)
+            delta_index = [i + offset for i in range(delta_len)]
+            print delta_index
+            delta_df = delta_df.set_index([delta_index])
+            ndf = df.append(delta_df)
+            ndf.to_csv(f)
+            
 
 
 if __name__ == "__main__":
-    tw = TsWrapper('603993')
-    #tw = TsWrapper('000001')
+    #tw = TsWrapper('603993')
+    tw = TsWrapper('000001')
     tw.update_hist_day_data()

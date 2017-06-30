@@ -38,8 +38,9 @@ class Tutorial(object):
     
     def getDeltaHistData(self):
         df = ts.get_k_data('603993', ktype='D', start='2017-06-28')
-        print type(df[1:])
-        print df.tail(1).iloc[0,0]
+        ndf = df.set_index([[0,1]])
+        #ndf = df.reset_index()
+        print ndf
 
 if __name__ == "__main__":
     t = Tutorial()
