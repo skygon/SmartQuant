@@ -35,8 +35,13 @@ class Tutorial(object):
         df = DataFrame.from_csv(full_path)
         print df.code
         print df[df.code.isin([600993, '002277'])]
+    
+    def getDeltaHistData(self):
+        df = ts.get_k_data('603993', ktype='D', start='2017-06-28')
+        print type(df[1:])
+        print df.tail(1).iloc[0,0]
 
 if __name__ == "__main__":
     t = Tutorial()
     #t.parseStockBasics()
-    t.parseZZ500()
+    t.getDeltaHistData()
