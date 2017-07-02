@@ -22,6 +22,19 @@ class TsWrapper(object):
         
         return full_path
     
+    def addSepToFirstLine(self, full_path):
+        all_lines = []
+        with open(full_path, 'r') as f:
+            all_lines = f.readlines()
+        
+        line = all_lines[0]
+        new_line = "," + line
+        all_lines[0] = new_line
+
+        with open(full_path, 'w') as f:
+            for l in all_lines:
+                f.write(l)
+    
     # ================START LOGIC==================
     def get_today_deals(self):
         df = ts.get_today_ticks(self.code)
@@ -38,10 +51,12 @@ class TsWrapper(object):
     def get_hist_day_data_2(self):
         try:
             df = ts.get_hist_data(self.code, ktype='D')
+            df = df.iloc[::-1]
             full_path = self.getFullPath('_hist_d_2.csv')
             Utils.save2CSVFile(df, full_path)
+            self.addSepToFirstLine(full_path)
         except Exception, e:
-            print "get_hist_day_data failed: %s" %(str(e))
+            print "get_hist_day_data_2 failed: %s" %(str(e))
     
 
     def update_hist_day_data(self):
@@ -69,4 +84,4 @@ class TsWrapper(object):
 if __name__ == "__main__":
     #tw = TsWrapper('603993')
     tw = TsWrapper('000001')
-    tw.update_hist_day_data()
+    tw.get_hist_day_data_2()

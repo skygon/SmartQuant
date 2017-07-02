@@ -11,7 +11,7 @@ class Utils(object):
         # queues
         self.full_queue = Queue.Queue()
         self.read_to_queue(self.sh_a, self.full_queue)
-        self.read_to_queue(self.sh_z, self.full_queue)
+        self.read_to_queue(self.sz_a, self.full_queue)
     
     @staticmethod
     def save2CSVFile(df, full_path, enc='utf-8'):
@@ -24,3 +24,6 @@ class Utils(object):
                 code = line.strip('\n')
                 self.full_queue.put(code)
                 line = f.readline()
+
+
+g_utils = Utils()
