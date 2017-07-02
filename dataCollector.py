@@ -45,4 +45,4 @@ def getHistDay_2(t):
             t.join()
 
 if __name__ == "__main__":
-    getHistDay_2('hist_day_2')
+    getHistDay_2('hist_day')
