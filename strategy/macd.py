@@ -18,15 +18,16 @@ class MACD(object):
         close = df.close.values
         dif, dea, macd = talib.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
         return dif, dea, macd
-    
+
+class StrategyMACD(object):
+    def __init__(self, code):
+        self.code = code
 
 if __name__ == "__main__":
-    m = MACD("603993")
+    m = MACD('603993')
     dif, dea, macd = m.getMACD()
-    plt.figure()
-    plt.plot(range(len(dif)), dif, 'k', label='DIF')
-    plt.plot(range(len(dea)), dea, 'y-', label='DEA')
-    plt.plot(range(len(macd)), macd, 'r-', label='MACD')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    for i in range(len(dif)):
+        print "DIF: %s, DEA: %s, MACD: %s" %(dif[i], dea[i], 2*macd[i])
+    
+    
+    
