@@ -13,13 +13,13 @@ class TsWrapper(object):
     def setCode(self, new_code):
         self.code = new_code
     
-    def getFullPath(self, ftype='D'):
+    def getFullPath(self, appendix, ftype='D'):
+        file_name = self.code + appendix
         if ftype == 'D':
-            file_name = self.code + '_hist_d.csv'
+            full_path = os.path.join(self.hist_day_data_path, file_name)    
         else:
-            raise Exception("Invalid file type")
+            raise Exception("Invalid file type")     
         
-        full_path = os.path.join(self.hist_day_data_path, file_name)
         return full_path
     
     # ================START LOGIC==================
@@ -30,13 +30,22 @@ class TsWrapper(object):
     def get_hist_day_data(self):
         try:
             df = ts.get_k_data(self.code, ktype='D')
-            full_path = self.getFullPath()
+            full_path = self.getFullPath('_hist_d.csv')
             Utils.save2CSVFile(df, full_path)
         except Exception, e:
             print "get_hist_day_data failed: %s" %(str(e))
-        
+    
+    def get_hist_day_data_2(self):
+        try:
+            df = ts.get_hist_data(self.code, ktype='D')
+            full_path = self.getFullPath('_hist_d_2.csv')
+            Utils.save2CSVFile(df, full_path)
+        except Exception, e:
+            print "get_hist_day_data failed: %s" %(str(e))
+    
+
     def update_hist_day_data(self):
-        full_path = self.getFullPath()
+        full_path = self.getFullPath('_hist_d.csv')
         df = DataFrame.from_csv(full_path)
         last_frame = df.tail(1)
         date_string = last_frame.iloc[0,0] # date is the first cell of on row
