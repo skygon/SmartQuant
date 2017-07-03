@@ -78,6 +78,9 @@ class TsWrapper(object):
             delta_df = delta_df.set_index([delta_index])
             ndf = df.append(delta_df)
             ndf.to_csv(f)
+    
+    def update_hist_day_data_2(self):
+        pass
             
 
 

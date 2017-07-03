@@ -19,10 +19,6 @@ class MACD(object):
         dif, dea, macd = talib.MACD(close, fastperiod=12, slowperiod=26, signalperiod=9)
         return dif, dea, macd
 
-class StrategyMACD(object):
-    def __init__(self, code):
-        self.code = code
-
 if __name__ == "__main__":
     m = MACD('603993')
     dif, dea, macd = m.getMACD()
