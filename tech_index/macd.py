@@ -24,12 +24,15 @@ class MACD(object):
             print "getMACD error %s" %str(e)
     
     # MUST call after getMACD
-    # 同时交叉点的涨幅不能多大，最好在1%一下
-    def canBuy(self):
+    # strategy 0: simple cross
+    # strategy 1: cross and small increase price
+    # strategy 2: cross; decline volume; small increase price
+    
+    def canBuy(self, strategy=2):
         ret = False
         if self.dif[-1] >= self.dea[-1]:
             if self.dif[-2] < self.dea[-2] and self.dif[-3] < self.dea[-3]:
-                if (self.close[-1] - self.close[-2]) / self.close[-2] <= 0.1:
+                if (self.close[-1] - self.close[-2]) / self.close[-2] <= 0.015:
                     ret = True
             
         return ret

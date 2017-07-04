@@ -13,7 +13,7 @@ class ST_MACD(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         #self.que = Utils.getHS300Queue()
-        self.que = Utils.getZZ500Queue()
+        self.que = Utils.getHS300AndZZ500()
         self.macd = MACD('000001')
         self.start()
 

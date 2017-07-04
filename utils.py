@@ -10,7 +10,8 @@ class Utils(object):
         # config files:
         self.sh_a = os.path.join(self.cfg_path, 'sh_a.txt')
         self.sz_a = os.path.join(self.cfg_path, 'sz_a.txt')
-        # queues
+        # queues. full_queue is used for multithreading workers to process code sets.
+        # Thus it's should be a singlton queue. Used from g_utils
         self.full_queue = Queue.Queue()
         self.read_to_queue(self.sh_a, self.full_queue)
         self.read_to_queue(self.sz_a, self.full_queue)
@@ -47,10 +48,23 @@ class Utils(object):
             que.put(c)
         
         return que
+    
+    @staticmethod
+    def getHS300AndZZ500():
+        que1 = Utils.getHS300Queue()
+        que2 = Utils.getZZ500Queue()
+        while True:
+            try:
+                code = que2.get(False)
+                que1.put(code)
+            except Queue.Empty:
+                break
+        
+        return que1
 
 g_utils = Utils()
 
 
 if __name__ == "__main__":
-    que = Utils.getHS300Queue()
+    que = Utils.getHS300AndZZ500()
     print que.qsize()

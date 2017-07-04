@@ -19,6 +19,10 @@ class DataCollector(threading.Thread):
             self.ts.get_hist_day_data()
         elif self.type == 'hist_day_2':
             self.ts.get_hist_day_data_2()
+        elif self.type == 'update_hist_day':
+            self.ts.update_hist_day_data()
+        elif self.type == 'upadte_hist_day_2':
+            self.ts.update_hist_day_data_2()
     
 
     def run(self):
@@ -45,4 +49,4 @@ def getHistDay_2(t):
             t.join()
 
 if __name__ == "__main__":
-    getHistDay_2('hist_day')
+    getHistDay_2('update_hist_day')
