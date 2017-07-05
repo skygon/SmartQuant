@@ -22,7 +22,7 @@ class KDJ(object):
         close = df.close.values
         self.date = df.date.values
         # matype: 0=SMA, 1=EMA, 2=WMA, 3=DEMA, 4=TEMA, 5=TRIMA, 6=KAMA, 7=MAMA, 8=T3 (Default=SMA)
-        K, D = ta.STOCH(high, low, close, fastk_period=9,slowk_period=3,slowk_matype=1,slowd_period=3,slowd_matype=1)
+        K, D = ta.STOCH(high, low, close, fastk_period=9,slowk_period=3,slowk_matype=8,slowd_period=3,slowd_matype=0)
         return K, D
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ class RSI(object):
         file_name = self.code + '_hist_d.csv'
         full_path = os.path.join(self.hist_day_path, file_name)
         self.df = DataFrame.from_csv(full_path)
-        close = self.df.close.valuse
+        close = self.df.close.values
         rsi = {}
         rsi['6'] = ta.RSI(close, timeperiod=6)
         rsi['12'] = ta.RSI(close, timeperiod=12)
