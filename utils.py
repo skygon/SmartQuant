@@ -2,6 +2,11 @@ import os
 import Queue
 from pandas import DataFrame
 
+last_days = {}
+last_days['one'] = -1
+last_days['two'] = -2
+last_days['three'] = -3
+last_days['four'] = -4
 
 class Utils(object):
     cfg_path = os.path.join(os.getcwd(), 'config')

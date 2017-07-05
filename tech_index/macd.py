@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 from pandas import DataFrame
 
 class MACD(object):
-    def __init__(self, code):
-        self.today = '2017-07-03' # last record of hist data files
+    def __init__(self, code, today):
+        self.today = today # last record of hist data files
         self.code = code
         self.hist_day_path = os.path.join(os.getcwd(), 'hist_data', 'day')
     
@@ -22,7 +22,6 @@ class MACD(object):
             self.volume = self.df.volume.values
             self.date = self.df.date.values
             self.dif, self.dea, self.macd = talib.MACD(self.close, fastperiod=12, slowperiod=26, signalperiod=9)
-            return self.dif, self.dea, self.macd, self.date
         except Exception, e:
             print "getMACD error %s" %str(e)
     
@@ -51,6 +50,7 @@ class MACD(object):
     # strategy 1: cross and small increase price
     # strategy 2: cross; decline volume; small increase price
     def canBuy(self, strategy=2):
+        self.getMACD()
         ret = False
         if self.invalidCode():
             return ret
@@ -70,8 +70,7 @@ class MACD(object):
 
 
 if __name__ == "__main__":
-    m = MACD('603993')
-    dif, dea, macd, date_str = m.getMACD()
+    m = MACD('603993', '2017-07-04')
     #for i in range(len(dif)):
     #    print "%s: DIF: %s, DEA: %s, MACD: %s" %(date_str[i], dif[i], dea[i], 2*macd[i])
     m.canBuy(2)
