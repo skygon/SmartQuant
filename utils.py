@@ -15,6 +15,10 @@ class Utils(object):
         self.full_queue = Queue.Queue()
         self.read_to_queue(self.sh_a, self.full_queue)
         self.read_to_queue(self.sz_a, self.full_queue)
+
+        self.hs300_que = self.getHS300QueueIns()
+        self.zz500_que = self.getZZ500QueueIns()
+        self.hs300_zz500_que = self.getHS300AndZZ500Ins()
     
     @staticmethod
     def save2CSVFile(df, full_path, enc='utf-8'):
@@ -37,6 +41,38 @@ class Utils(object):
             que.put(c)
         
         return que
+    
+    def getHS300QueueIns(self):
+        que = Queue.Queue()
+        full_path = os.path.join(Utils.cfg_path, 'hs300.csv')
+        df = DataFrame.from_csv(full_path)
+        codes = df.code.values
+        for c in codes:
+            que.put(c)
+        
+        return que
+    
+    def getZZ500QueueIns(self):
+        que = Queue.Queue()
+        full_path = os.path.join(Utils.cfg_path, 'zz500.csv')
+        df = DataFrame.from_csv(full_path)
+        codes = df.code.values
+        for c in codes:
+            que.put(c)
+        
+        return que
+    
+    def getHS300AndZZ500Ins(self):
+        que1 = Utils.getHS300Queue()
+        que2 = Utils.getZZ500Queue()
+        while True:
+            try:
+                code = que2.get(False)
+                que1.put(code)
+            except Queue.Empty:
+                break
+        
+        return que1
 
     @staticmethod
     def getZZ500Queue():

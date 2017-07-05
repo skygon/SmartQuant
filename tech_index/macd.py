@@ -6,6 +6,7 @@ from pandas import DataFrame
 
 class MACD(object):
     def __init__(self, code):
+        self.today = '2017-07-03' # last record of hist data files
         self.code = code
         self.hist_day_path = os.path.join(os.getcwd(), 'hist_data', 'day')
     
@@ -19,8 +20,9 @@ class MACD(object):
             self.df = DataFrame.from_csv(full_path)
             self.close = self.df.close.values
             self.volume = self.df.volume.values
+            self.date = self.df.date.values
             self.dif, self.dea, self.macd = talib.MACD(self.close, fastperiod=12, slowperiod=26, signalperiod=9)
-            return self.dif, self.dea, self.macd, self.df.date.values
+            return self.dif, self.dea, self.macd, self.date
         except Exception, e:
             print "getMACD error %s" %str(e)
     
@@ -50,6 +52,9 @@ class MACD(object):
     # strategy 2: cross; decline volume; small increase price
     def canBuy(self, strategy=2):
         ret = False
+        if self.invalidCode():
+            return ret
+        
         if strategy == 0:
             ret = self.isUpCross()
         elif strategy == 1:
@@ -59,7 +64,10 @@ class MACD(object):
             
         return ret
         
-        
+    
+    def invalidCode(self):
+        return self.date[-1] != self.today
+
 
 if __name__ == "__main__":
     m = MACD('603993')
