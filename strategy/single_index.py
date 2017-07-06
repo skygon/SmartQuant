@@ -16,11 +16,14 @@ class SingleIndex(threading.Thread):
         threading.Thread.__init__(self)
         #self.que = Utils.getHS300Queue()
         self.que = g_utils.full_queue
-        self.day = '2017-07-04'
+        self.day = '2017-07-05'
         if index_type == 'macd':
             self.index_obj = MACD('000001', self.day)
         elif index_type == 'rsi':
             self.index_obj = RSI('000001', self.day)
+        
+        date = self.index_obj.getCurrentDate()[last_days['one']]
+        print date
         self.start()
 
     def processOneCode(self, code):

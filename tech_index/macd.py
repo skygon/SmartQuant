@@ -18,9 +18,9 @@ class MACD(object):
             file_name = self.code + '_hist_d.csv'
             full_path = os.path.join(self.hist_day_path, file_name)
             self.df = DataFrame.from_csv(full_path)
+            self.date = self.df.date.values
             self.close = self.df.close.values
             self.volume = self.df.volume.values
-            self.date = self.df.date.values
             self.dif, self.dea, self.macd = talib.MACD(self.close, fastperiod=12, slowperiod=26, signalperiod=9)
         except Exception, e:
             print "getMACD error %s" %str(e)
