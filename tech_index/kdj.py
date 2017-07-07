@@ -46,7 +46,13 @@ class KDJ(object):
         return True
 
     def rightCross(self):
+        count = 0
+        for i in range(len(day_array) - 1):
+            if self.d[last_days[day_array[i]]] < self.d[last_days[day_array[i+1]]]:
+                return False
+            
         return True
+
     
     def canBuy(self):
         try:
