@@ -49,6 +49,7 @@ class KDJ(object):
         count = 0
         for i in range(len(day_array) - 1):
             if self.d[last_days[day_array[i]]] < self.d[last_days[day_array[i+1]]]:
+                print "==== exit rigthCross ===="
                 return False
             
         return True

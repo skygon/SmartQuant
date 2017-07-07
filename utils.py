@@ -2,7 +2,7 @@ import os
 import Queue
 from pandas import DataFrame
 
-debug = True
+debug = False
 day_array = ['one', 'two', 'three', 'four']
 last_days = {}
 if debug:
