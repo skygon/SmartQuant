@@ -1,5 +1,6 @@
 import os
 import talib as ta
+import numpy as np
 from pandas import DataFrame
 import sys
 sys.path.append(os.getcwd())
@@ -24,17 +25,55 @@ class KDJ(object):
         date = df.date.values
         return date
     
-    def getKDJ(self):
+    def prepareData(self):
         file_name = self.code + '_hist_d.csv'
         full_path = os.path.join(self.hist_day_path, file_name)
 
         self.df = DataFrame.from_csv(full_path)
-        high = self.df.high.values
-        low = self.df.low.values
-        close = self.df.close.values
+        self.high = self.df.high.values
+        self.low = self.df.low.values
+        self.close = self.df.close.values
+        self.date = self.df.date.values
+
+    def getKDJ(self):
+        self.prepareData()
         # matype: 0=SMA, 1=EMA, 2=WMA, 3=DEMA, 4=TEMA, 5=TRIMA, 6=KAMA, 7=MAMA, 8=T3 (Default=SMA)
-        self.k, self.d = ta.STOCH(high, low, close, fastk_period=9,slowk_period=3,slowk_matype=0,slowd_period=3,slowd_matype=0)
-    
+        self.k, self.d = ta.STOCH(self.high, self.low, self.close, fastk_period=9,slowk_period=3,slowk_matype=0,slowd_period=3,slowd_matype=0)
+
+
+    def getRSV(self, N):
+        self.rsv = [0] * len(self.close)
+        # first day
+        d0 = (self.close[0] - self.low[0]) / (self.high[0] - self.low[0]) * 100
+        self.rsv[0] = d0
+
+        for i in range(1, len(self.close)):
+            # first N days
+            if i < N:
+                d = (self.close[i] - min(self.low[:i+1])) / (max(self.high[:i+1]) - min(self.low[:i+1])) * 100
+                self.rsv[i] = d
+            else:
+                d = (self.close[i] - min(self.low[i-N+1:i+1])) / (max(self.high[i-N+1:i+1]) - min(self.low[i-N+1:i+1])) * 100
+                self.rsv[i] = d
+        
+
+    def getKDJ2(self, N1=9, N2=3, N3=3):
+        self.prepareData()
+        self.getRSV(N1)
+
+        self.k = [0] * len(self.close)
+        self.d = [0] * len(self.close)
+        self.j = [0] * len(self.close)
+
+        self.k[0] = float(2) / 3 * 50 + float(1) / 3 * self.rsv[0]
+        self.d[0] = float(2) / 3 * 50 + float(1) / 3 * self.k[0]
+        self.j[0] = 3 * self.k[0] - 2 * self.d[0]
+
+        for i in range(1, len(self.close)):
+            self.k[i] = float(2) / 3 * self.k[i-1] + float(1) / 3 * self.rsv[i]
+            self.d[i] = float(2) / 3 * self.d[i-1] + float(1) / 3 * self.k[i]
+            self.j[i] = 3 * self.k[i] - 2 * self.d[i]
+     
     def bottomCross(self):
         if self.k[last_days['one']] < self.d[last_days['one']]:
                 self.exit_bottom_cross += 1
@@ -78,6 +117,13 @@ class KDJ(object):
         except Exception, e:
             print "KDJ.canBuy failed %s" %(str(e))
 
+    
+
 if __name__ == "__main__":
     kdj = KDJ('603993')
+    #kdj.getKDJ()
+    kdj.getKDJ2()
+    
+    for i in range(len(kdj.close)):
+        print kdj.date[i], kdj.k[i], kdj.d[i], kdj.j[i]
     
