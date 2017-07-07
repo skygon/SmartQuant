@@ -3,7 +3,7 @@ import Queue
 from ts_wrapper import TsWrapper
 from utils import *
 
-thread_poll_num = 300
+thread_poll_num = 600
 
 class DataCollector(threading.Thread):
     def __init__(self, t='hist_day'):
