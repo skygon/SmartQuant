@@ -6,9 +6,8 @@ sys.path.append(os.getcwd())
 from utils import *
 
 class RSI(object):
-    def __init__(self, code, today):
+    def __init__(self, code):
         self.code = code
-        self.today = today
         self.hist_day_path = os.path.join(os.getcwd(), 'hist_data', 'day')
 
     def getCurrentDate(self):

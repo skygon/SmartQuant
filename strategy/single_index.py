@@ -16,11 +16,12 @@ class SingleIndex(threading.Thread):
         threading.Thread.__init__(self)
         #self.que = Utils.getHS300Queue()
         self.que = g_utils.full_queue
-        self.day = '2017-07-05'
         if index_type == 'macd':
-            self.index_obj = MACD('000001', self.day)
+            self.index_obj = MACD('000001')
         elif index_type == 'rsi':
-            self.index_obj = RSI('000001', self.day)
+            self.index_obj = RSI('000001')
+        elif index_type == 'kdj':
+            self.index_obj = KDJ('000001')
         
         date = self.index_obj.getCurrentDate()[last_days['one']]
         print date
@@ -54,7 +55,7 @@ class SingleIndex(threading.Thread):
 if __name__ =="__main__":
     threads = []
     for i in range(tp_num):
-        t = SingleIndex('rsi')
+        t = SingleIndex('kdj')
         threads.append(t)
     
     for t in threads:
