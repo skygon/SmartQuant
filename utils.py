@@ -2,20 +2,14 @@ import os
 import Queue
 from pandas import DataFrame
 
-debug = False
+debug = True
 day_array = ['one', 'two', 'three', 'four']
 last_days = {}
-if debug:
-    i = -2
-    last_days['one'] = i
-    last_days['two'] = i-1
-    last_days['three'] = i-2
-    last_days['four'] = i-3
-else:
-    last_days['one'] = -1
-    last_days['two'] = -2
-    last_days['three'] = -3
-    last_days['four'] = -4
+start_day = -10
+last_days['one'] = start_day+3
+last_days['two'] = start_day+2
+last_days['three'] = start_day+1
+last_days['four'] = start_day
 
 turn_on = False
 def debug_logger(msg):

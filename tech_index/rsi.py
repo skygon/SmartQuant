@@ -51,7 +51,7 @@ class RSI(object):
                     debug_logger("==== exit 2 ====")
                     return False
             
-            if min(self.rsi['6'][-4:]) >= 20:
+            if min(self.rsi['6'][start_day:start_day+4]) >= 20:
                 debug_logger("==== exit 3 ====")
                 return False
             

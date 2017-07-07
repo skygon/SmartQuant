@@ -10,6 +10,9 @@ class KDJ(object):
     def __init__(self, code):
         self.code = code
         self.hist_day_path = os.path.join(os.getcwd(), 'hist_data', 'day')
+        self.total = 0
+        self.exit_bottom_cross = 0
+        self.exit_right_cross = 0
     
     def setCode(self, code):
         self.code = code
@@ -34,13 +37,16 @@ class KDJ(object):
     
     def bottomCross(self):
         if self.k[last_days['one']] < self.d[last_days['one']]:
+                self.exit_bottom_cross += 1
                 return False
             
         for d in ['two', 'three', 'four']:
             if self.k[last_days[d]] >= self.d[last_days[d]]:
+                self.exit_bottom_cross += 1
                 return False
             
-        if min(self.k[-4:]) > 20:
+        if min(self.k[start_day:start_day+4]) > 20:
+            self.exit_bottom_cross += 1
             return False
         
         return True
@@ -49,19 +55,24 @@ class KDJ(object):
         count = 0
         for i in range(len(day_array) - 1):
             if self.d[last_days[day_array[i]]] < self.d[last_days[day_array[i+1]]]:
-                print "==== exit rigthCross ===="
+                self.exit_right_cross += 1
                 return False
             
         return True
 
+    def analysis(self):
+        print "==== total codes : %s" %(self.total)
+        print "==== exit from bottom cross : %s" %(self.exit_bottom_cross)
+        print "==== exit from right cross : %s" %(self.exit_right_cross)
     
     def canBuy(self):
         try:
+            self.total += 1
             self.getKDJ()
             if self.bottomCross() is False:
                 return False
-            if self.rightCross() is False:
-                return False
+            #if self.rightCross() is False:
+            #    return False
             
             return True
         except Exception, e:

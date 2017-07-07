@@ -50,6 +50,8 @@ class SingleIndex(threading.Thread):
                 break
             except Exception, e:
                 print "single index Error : %s \n" %(str(e))
+        
+        self.index_obj.analysis()
 
 
 if __name__ =="__main__":
