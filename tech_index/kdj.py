@@ -14,16 +14,19 @@ class KDJ(object):
         self.total = 0
         self.exit_bottom_cross = 0
         self.exit_right_cross = 0
+        self.getCurrentDate()
     
     def setCode(self, code):
         self.code = code
     
     def getCurrentDate(self):
-        file_name = '601998_hist_d.csv' # china bank
+        file_name = '601988_hist_d.csv' # china bank
         full_path = os.path.join(self.hist_day_path, file_name)
         df = DataFrame.from_csv(full_path)
-        date = df.date.values
-        return date
+        self.current_date = df.date.values[last_days['one']]
+    
+    def invalidCode(self):
+
     
     def prepareData(self):
         file_name = self.code + '_hist_d.csv'
@@ -121,8 +124,8 @@ class KDJ(object):
             self.getKDJ2()
             if self.bottomCross() is False:
                 return False
-            #if self.rightCross() is False:
-            #    return False
+            if self.rightCross() is False:
+                return False
             
             return True
         except Exception, e:

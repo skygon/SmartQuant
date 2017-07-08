@@ -11,7 +11,7 @@ class RSI(object):
         self.hist_day_path = os.path.join(os.getcwd(), 'hist_data', 'day')
 
     def getCurrentDate(self):
-        file_name = '601998_hist_d.csv' # china bank
+        file_name = '601988_hist_d.csv' # china bank
         full_path = os.path.join(self.hist_day_path, file_name)
         df = DataFrame.from_csv(full_path)
         date = df.date.values
@@ -19,6 +19,9 @@ class RSI(object):
 
     def setCode(self, code):
         self.code = code
+    
+    def analysis(self):
+        pass
 
     def invalidCode(self):
         #return self.date[-1] != self.today

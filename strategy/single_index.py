@@ -23,8 +23,7 @@ class SingleIndex(threading.Thread):
         elif index_type == 'kdj':
             self.index_obj = KDJ('000001')
         
-        date = self.index_obj.getCurrentDate()[last_days['one']]
-        print date
+        print self.index_obj.current_date
         self.start()
 
     def processOneCode(self, code):
@@ -57,7 +56,7 @@ class SingleIndex(threading.Thread):
 if __name__ =="__main__":
     threads = []
     for i in range(tp_num):
-        t = SingleIndex('kdj')
+        t = SingleIndex('rsi')
         threads.append(t)
     
     for t in threads:
