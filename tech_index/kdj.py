@@ -44,7 +44,10 @@ class KDJ(object):
     def getRSV(self, N):
         self.rsv = [0] * len(self.close)
         # first day
-        d0 = (self.close[0] - self.low[0]) / (self.high[0] - self.low[0]) * 100
+        if self.high[0] == self.low[0]:
+            d0 = 100
+        else:
+            d0 = (self.close[0] - self.low[0]) / (self.high[0] - self.low[0]) * 100
         self.rsv[0] = d0
 
         for i in range(1, len(self.close)):
@@ -58,21 +61,24 @@ class KDJ(object):
         
 
     def getKDJ2(self, N1=9, N2=3, N3=3):
-        self.prepareData()
-        self.getRSV(N1)
+        try:
+            self.prepareData()
+            self.getRSV(N1)
 
-        self.k = [0] * len(self.close)
-        self.d = [0] * len(self.close)
-        self.j = [0] * len(self.close)
+            self.k = [0] * len(self.close)
+            self.d = [0] * len(self.close)
+            self.j = [0] * len(self.close)
 
-        self.k[0] = float(2) / 3 * 50 + float(1) / 3 * self.rsv[0]
-        self.d[0] = float(2) / 3 * 50 + float(1) / 3 * self.k[0]
-        self.j[0] = 3 * self.k[0] - 2 * self.d[0]
+            self.k[0] = float(2) / 3 * 50 + float(1) / 3 * self.rsv[0]
+            self.d[0] = float(2) / 3 * 50 + float(1) / 3 * self.k[0]
+            self.j[0] = 3 * self.k[0] - 2 * self.d[0]
 
-        for i in range(1, len(self.close)):
-            self.k[i] = float(2) / 3 * self.k[i-1] + float(1) / 3 * self.rsv[i]
-            self.d[i] = float(2) / 3 * self.d[i-1] + float(1) / 3 * self.k[i]
-            self.j[i] = 3 * self.k[i] - 2 * self.d[i]
+            for i in range(1, len(self.close)):
+                self.k[i] = float(2) / 3 * self.k[i-1] + float(1) / 3 * self.rsv[i]
+                self.d[i] = float(2) / 3 * self.d[i-1] + float(1) / 3 * self.k[i]
+                self.j[i] = 3 * self.k[i] - 2 * self.d[i]
+        except Exception, e:
+            print "getKDJ2 failed %s" %(str(e))
      
     def bottomCross(self):
         if self.k[last_days['one']] < self.d[last_days['one']]:
@@ -83,10 +89,15 @@ class KDJ(object):
             if self.k[last_days[d]] >= self.d[last_days[d]]:
                 self.exit_bottom_cross += 1
                 return False
-            
-        if min(self.k[start_day:start_day+4]) > 20:
-            self.exit_bottom_cross += 1
-            return False
+        
+        if start_day == -4:
+            if min(self.k[start_day:]) > 20:
+                self.exit_bottom_cross += 1
+                return False
+        else:
+            if min(self.k[start_day:start_day+4]) > 20:
+                self.exit_bottom_cross += 1
+                return False
         
         return True
 
@@ -107,7 +118,7 @@ class KDJ(object):
     def canBuy(self):
         try:
             self.total += 1
-            self.getKDJ()
+            self.getKDJ2()
             if self.bottomCross() is False:
                 return False
             #if self.rightCross() is False:
@@ -120,7 +131,7 @@ class KDJ(object):
     
 
 if __name__ == "__main__":
-    kdj = KDJ('603993')
+    kdj = KDJ('300406')
     #kdj.getKDJ()
     kdj.getKDJ2()
     
