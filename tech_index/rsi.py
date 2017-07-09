@@ -9,13 +9,13 @@ class RSI(object):
     def __init__(self, code):
         self.code = code
         self.hist_day_path = os.path.join(os.getcwd(), 'hist_data', 'day')
+        self.getCurrentDate()
 
     def getCurrentDate(self):
         file_name = '601988_hist_d.csv' # china bank
         full_path = os.path.join(self.hist_day_path, file_name)
         df = DataFrame.from_csv(full_path)
-        date = df.date.values
-        return date
+        self.current_date = df.date.values[last_days['one']]
 
     def setCode(self, code):
         self.code = code
@@ -24,8 +24,11 @@ class RSI(object):
         pass
 
     def invalidCode(self):
-        #return self.date[-1] != self.today
-        return False
+        today = self.df.date.values[last_days['one']]
+        if today == self.current_date:
+            return False
+        
+        return True
 
     def getRSI(self):
         file_name = self.code + '_hist_d.csv'
@@ -54,9 +57,13 @@ class RSI(object):
                     debug_logger("==== exit 2 ====")
                     return False
             
-            if min(self.rsi['6'][start_day:start_day+4]) >= 20:
-                debug_logger("==== exit 3 ====")
-                return False
+            if start_day == -4:
+                if min(self.rsi['6'][start_day:]) >= 20:
+                    return False
+            else:
+                if min(self.rsi['6'][start_day:start_day+4]) >= 20:
+                    debug_logger("==== exit 3 ====")
+                    return False
             
             return True
         except Exception, e:

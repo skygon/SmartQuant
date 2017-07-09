@@ -3,15 +3,31 @@ import os
 import talib
 import matplotlib.pyplot as plt
 from pandas import DataFrame
+import sys
+sys.path.append(os.getcwd())
+from utils import *
 
 class MACD(object):
-    def __init__(self, code, today):
-        self.today = today # last record of hist data files
+    def __init__(self, code):
         self.code = code
         self.hist_day_path = os.path.join(os.getcwd(), 'hist_data', 'day')
+        self.getCurrentDate()
     
     def setCode(self, code):
         self.code = code
+    
+    def getCurrentDate(self):
+        file_name = '601988_hist_d.csv' # china bank
+        full_path = os.path.join(self.hist_day_path, file_name)
+        df = DataFrame.from_csv(full_path)
+        self.current_date = df.date.values[last_days['one']]
+    
+    def invalidCode(self):
+        today = self.df.date.values[last_days['one']]
+        if today == self.current_date:
+            return False
+        
+        return True
     
     def getMACD(self):
         try:
@@ -26,21 +42,25 @@ class MACD(object):
             print "getMACD error %s" %str(e)
     
     def isUpCross(self):
-        ret = False
-        if self.dif[-1] >= self.dea[-1]:
-            if self.dif[-2] < self.dea[-2] and self.dif[-3] < self.dea[-3]:
-                return True
+        if self.dif[last_days['one']] < self.dea[last_days['one']]:
+            return False
+        
+        for i in range(1, len(day_array)):
+            if self.dif[last_days[day_array[i]]] >= self.dea[last_days[day_array[i]]]:
+                return False
+        
+        return True
     
     def isSmallIncPrice(self):
         ret = False
-        if (self.close[-1] - self.close[-2] > 0) and (self.close[-1] - self.close[-2]) / self.close[-2] <= 0.015:
+        if (self.close[last_days['one']] - self.close[last_days['two']] > 0) and (self.close[last_days['one']] - self.close[last_days['two']]) / self.close[last_days['two']] <= 0.015:
             ret = True
 
         return ret
 
     def isDeclineVolume(self):
         ret = False
-        if self.volume[-1] < self.volume[-2]:
+        if self.volume[last_days['one']] < self.volume[last_days['two']]:
             ret = True
         
         return ret
@@ -64,15 +84,15 @@ class MACD(object):
             
         return ret
         
-    
-    def invalidCode(self):
-        return self.date[-1] != self.today
+    def analysis(self):
+        pass
 
 
 if __name__ == "__main__":
-    m = MACD('603993', '2017-07-04')
-    #for i in range(len(dif)):
-    #    print "%s: DIF: %s, DEA: %s, MACD: %s" %(date_str[i], dif[i], dea[i], 2*macd[i])
+    m = MACD('600007')
     m.canBuy(2)
+    for i in range(len(m.dif)):
+        print "%s: DIF: %s, DEA: %s, MACD: %s" %(m.date[i], m.dif[i], m.dea[i], 2*m.macd[i])
+    
     
     

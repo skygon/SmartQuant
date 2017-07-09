@@ -26,6 +26,11 @@ class KDJ(object):
         self.current_date = df.date.values[last_days['one']]
     
     def invalidCode(self):
+        today = self.df.date.values[last_days['one']]
+        if today == self.current_date:
+            return False
+        
+        return True
 
     
     def prepareData(self):
@@ -122,6 +127,9 @@ class KDJ(object):
         try:
             self.total += 1
             self.getKDJ2()
+            if invalidCode():
+                return False
+            
             if self.bottomCross() is False:
                 return False
             if self.rightCross() is False:
