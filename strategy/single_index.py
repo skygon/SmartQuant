@@ -56,7 +56,7 @@ class SingleIndex(threading.Thread):
 if __name__ =="__main__":
     threads = []
     for i in range(tp_num):
-        t = SingleIndex('macd')
+        t = SingleIndex('kdj')
         threads.append(t)
     
     for t in threads:

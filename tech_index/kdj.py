@@ -14,6 +14,7 @@ class KDJ(object):
         self.total = 0
         self.exit_bottom_cross = 0
         self.exit_right_cross = 0
+        self.exit_invalid_code = 0
         self.getCurrentDate()
     
     def setCode(self, code):
@@ -30,6 +31,7 @@ class KDJ(object):
         if today == self.current_date:
             return False
         
+        self.exit_invalid_code += 1
         return True
 
     
@@ -99,11 +101,11 @@ class KDJ(object):
                 return False
         
         if start_day == -4:
-            if min(self.k[start_day:]) > 20:
+            if min(self.k[start_day:]) > 50:
                 self.exit_bottom_cross += 1
                 return False
         else:
-            if min(self.k[start_day:start_day+4]) > 20:
+            if min(self.k[start_day:start_day+4]) > 50:
                 self.exit_bottom_cross += 1
                 return False
         
@@ -111,8 +113,12 @@ class KDJ(object):
 
     def rightCross(self):
         count = 0
-        for i in range(len(day_array) - 1):
-            if self.d[last_days[day_array[i]]] < self.d[last_days[day_array[i+1]]]:
+        if self.d[last_days['one']] < self.d[last_days['two']]:
+            self.exit_right_cross += 1
+            return False
+        
+        for i in range(1, len(day_array) - 1):
+            if self.d[last_days[day_array[i]]] > self.d[last_days[day_array[i+1]]]:
                 self.exit_right_cross += 1
                 return False
             
@@ -120,6 +126,7 @@ class KDJ(object):
 
     def analysis(self):
         print "==== total codes : %s" %(self.total)
+        print "==== exit from invalid code : %s" %(self.exit_invalid_code)
         print "==== exit from bottom cross : %s" %(self.exit_bottom_cross)
         print "==== exit from right cross : %s" %(self.exit_right_cross)
     
@@ -127,7 +134,7 @@ class KDJ(object):
         try:
             self.total += 1
             self.getKDJ2()
-            if invalidCode():
+            if self.invalidCode():
                 return False
             
             if self.bottomCross() is False:
