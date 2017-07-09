@@ -96,7 +96,8 @@ class KDJ(object):
                 return False
             
         for d in ['two', 'three', 'four']:
-            if self.k[last_days[d]] >= self.d[last_days[d]]:
+            #if self.k[last_days[d]] >= self.d[last_days[d]]:
+            if self.d[last_days[d]] - self.k[last_days[d]] <= 10:
                 self.exit_bottom_cross += 1
                 return False
         

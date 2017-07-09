@@ -5,7 +5,7 @@ from pandas import DataFrame
 debug = True
 day_array = ['one', 'two', 'three', 'four']
 last_days = {}
-start_day = -15
+start_day = -10
 last_days['one'] = start_day+3
 last_days['two'] = start_day+2
 last_days['three'] = start_day+1
