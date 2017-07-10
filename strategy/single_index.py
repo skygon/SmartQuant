@@ -8,6 +8,7 @@ sys.path.append(os.path.join(os.getcwd(), 'tech_index'))
 from macd import MACD
 from rsi import RSI
 from kdj import KDJ
+from volume import Volume
 from utils import *
 
 tp_num = 1
@@ -22,6 +23,8 @@ class SingleIndex(threading.Thread):
             self.index_obj = RSI('000001')
         elif index_type == 'kdj':
             self.index_obj = KDJ('000001')
+        elif index_type == 'volume':
+            self.index_obj = Volume('000001')
         
         print self.index_obj.current_date
         self.start()
@@ -56,7 +59,7 @@ class SingleIndex(threading.Thread):
 if __name__ =="__main__":
     threads = []
     for i in range(tp_num):
-        t = SingleIndex('kdj')
+        t = SingleIndex('volume')
         threads.append(t)
     
     for t in threads:
