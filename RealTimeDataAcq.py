@@ -9,7 +9,7 @@ BILL_LIST_SUMMARY = "http://vip.stock.finance.sina.com.cn/quotes_service/api/jso
 STOCKS_INDEX = "http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData?"
 g_pages = 5 # We think the first five pages are most useful
 
-DEFAULT_PAGE_SIZE = 80
+DEFAULT_PAGE_SIZE = 60
 # Bill example url:
 #http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_Bill.GetBillList?symbol=sh603993&num=60&page=1&sort=ticktime&asc=0&volume=0&amount=200000&type=0&day=2017-05-26
 
@@ -23,8 +23,7 @@ Used for both real time strategy data fetching and machine learning data collect
 # api_type : bill_list, bill_list_count, bill_list_summary, STOCKS_INDEX
 
 class RTDA(object):
-    def __init__(self, date_string):
-        self.day = date_string
+    def __init__(self):
         # params day must as the last item
         self.params_list = {}
         self.params_list['bill'] = {}
@@ -56,6 +55,9 @@ class RTDA(object):
     def setCode(self, code):
         self.code = code
 
+    def setDate(self, date_string):
+        self.day = date_string
+
     def setParams(self, param_type, **kwargs):
         for k, v in kwargs.items():
             self.params_list[param_type][k] = v
@@ -82,7 +84,7 @@ class RTDA(object):
         
         if api_type != "stocks_index":
             url = url + "&day=" + self.day
-        print "url is %s" %(url)
+        #print "url is %s" %(url)
         return url
 
     def getRawData(self, api_type):
@@ -199,8 +201,9 @@ class RTDA(object):
 
 
 if __name__ == "__main__":
-    rtda = RTDA("2017-07-07")
+    rtda = RTDA()
     rtda.setCode("sh603993")
+    rtda.setDate("2017-07-07")
     rtda.setParams('bill', amount=200*100*100, type=0)
     data = rtda.getBillListSummary()
 
