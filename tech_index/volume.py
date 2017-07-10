@@ -1,3 +1,4 @@
+#coding=utf-8
 import os
 import sys
 from pandas import DataFrame
@@ -5,7 +6,9 @@ sys.path.append(os.getcwd())
 from utils import *
 from RealTimeDataAcq import RTDA
 
-
+'''
+以前一天的为量能突破分析的起始点，往前倒推。同时结合当前的K线和成交量等数据分析走势
+'''
 class Volume(object):
     def __init__(self, code):
         self.code = code
@@ -88,7 +91,7 @@ class Volume(object):
 
         return False
     
-    def positiveBigBill(self):
+    def positiveBigBill(self, day_index):
         try:
             if self.code.find("60") == 0:
                 code = "sh" + self.code
@@ -96,23 +99,35 @@ class Volume(object):
                 code = "sz" + self.code
             
             self.rtda.setCode(code)
-            self.rtda.setDate(self.date[last_days['one']])
+            self.rtda.setDate(self.date[day_index])
             self.rtda.setParams('bill', amount=200*100*100, type=0)
             data = self.rtda.getBillListSummary()
             if data is None:
                 return True
             
-            if float(data[0]['kuvolume']) == 0:
+            if data[0]['kuvolume'] < data[0]['kdvolume']:
                 return False
+            #if float(data[0]['kuvolume']) == 0:
+            #    return False
             
-            if float(data[0]['kdvolume']) / float(data[0]['kuvolume']) > 1.2:
-                return False
+            #if float(data[0]['kdvolume']) / float(data[0]['kuvolume']) > 1.2:
+            #    return False
             
             return True
         except Exception, e:
             print "positiveBigBill failed %s" %(str(e))
             return False
-
+    
+    #量能突破后，连续两天外盘大单占多
+    def conPositiveBigBill(self):
+        if self.positiveBigBill(last_days['one']) is False:
+            return False
+        
+        if self.positiveBigBill(last_days['one'] + 1) is False:
+            return False
+        
+        return True
+    
     def canBuy(self):
         try:
             self.prepareData()
@@ -127,9 +142,11 @@ class Volume(object):
                 self.exit_motivation_break += 1
                 return False
             
-            if self.positiveBigBill() is False:
+            if self.conPositiveBigBill() is False:
                 self.exit_big_bill += 1
                 return False
+
+
 
             self.stock_pool += 1
             return True
