@@ -103,7 +103,7 @@ class Volume(object):
             self.rtda.setParams('bill', amount=200*100*100, type=0)
             data = self.rtda.getBillListSummary()
             if data is None:
-                return True
+                return False
             
             if data[0]['kuvolume'] < data[0]['kdvolume']:
                 return False
