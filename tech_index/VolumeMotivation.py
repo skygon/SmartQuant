@@ -1,61 +1,14 @@
-#coding=utf-8
-import os
-import sys
-from pandas import DataFrame
-sys.path.append(os.getcwd())
-from utils import *
-from RealTimeDataAcq import RTDA
+from VolumeBase import VolumeBase
 
-'''
-以前一天的为量能突破分析的起始点，往前倒推。同时结合当前的K线和成交量等数据分析走势
-'''
-class Volume(object):
-    def __init__(self, code):
-        self.code = code
-        self.hist_day_path = os.path.join(os.getcwd(), 'hist_data', 'day')
+class VolumeMotivation(VolumeBase):
+    def __init__(self):
+        super(VolumeBase, self).__init__()
         self.total = 0
         self.exit_invalid_code = 0
         self.exit_motivation_break = 0
         self.exit_big_bill = 0
         self.stock_pool = 0
-        self.rtda = RTDA()
-        self.getCurrentDate()
-
-    def setCode(self, code):
-        self.code = code
     
-    def getCurrentDate(self):
-        file_name = '601988_hist_d.csv' # china bank
-        full_path = os.path.join(self.hist_day_path, file_name)
-        df = DataFrame.from_csv(full_path)
-        self.current_date = df.date.values[last_days['one']]
-    
-    def invalidCode(self):
-        today = self.df.date.values[last_days['one']]
-        if today == self.current_date:
-            return False
-        
-        return True
-
-    def isNewStock(self):
-        if len(self.close) < 200:
-            return True
-        return False
-
-    def isStartUp(self):
-        if self.code.find("300") == 0:
-            return True
-        return False
-    
-    def prepareData(self):
-        file_name = self.code + '_hist_d.csv'
-        full_path = os.path.join(self.hist_day_path, file_name)
-
-        self.df = DataFrame.from_csv(full_path)
-        self.close = self.df.close.values
-        self.volume = self.df.volume.values
-        self.date = self.df.date.values
-
     def getVolumeMA(self, day_index, interval=5):
         try:
             total = 0
@@ -88,7 +41,7 @@ class Volume(object):
             return False
 
     def motivationBreak(self):
-        for i in range(4, 30):
+        for i in range(4, 20):
             if self.quickIncVolume(last_days['one'] - i):
                 if self.close[last_days['one']] > self.close[last_days['one']-i]:
                     return True
@@ -134,6 +87,7 @@ class Volume(object):
     
     def canBuy(self):
         try:
+            self.total += 1
             self.prepareData()
             if self.invalidCode() or self.isNewStock():
                 self.exit_invalid_code += 1

@@ -16,7 +16,7 @@ class SingleIndex(threading.Thread):
     def __init__(self, index_type='macd'):
         threading.Thread.__init__(self)
         #self.que = Utils.getHS300Queue()
-        self.que = g_utils.full_queue
+        self.que = g_utils.hs300_que
         if index_type == 'macd':
             self.index_obj = MACD('000001')
         elif index_type == 'rsi':
