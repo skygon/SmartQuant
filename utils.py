@@ -5,7 +5,7 @@ from pandas import DataFrame
 debug = True
 day_array = ['one', 'two', 'three', 'four']
 last_days = {}
-start_day = -5
+start_day = -4
 last_days['one'] = start_day+3
 last_days['two'] = start_day+2
 last_days['three'] = start_day+1
@@ -29,6 +29,7 @@ class Utils(object):
         self.read_to_queue(self.sh_a, self.full_queue)
         self.read_to_queue(self.sz_a, self.full_queue)
 
+        self.sz50_que = self.getSZ50QueueIns()
         self.hs300_que = self.getHS300QueueIns()
         self.zz500_que = self.getZZ500QueueIns()
         self.hs300_zz500_que = self.getHS300AndZZ500Ins()
@@ -55,6 +56,16 @@ class Utils(object):
         
         return que
     
+    def getSZ50QueueIns(self):
+        que = Queue.Queue()
+        full_path = os.path.join(Utils.cfg_path, 'sz50.csv')
+        df = DataFrame.from_csv(full_path)
+        codes = df.code.values
+        for c in codes:
+            que.put(c)
+        
+        return que
+
     def getHS300QueueIns(self):
         que = Queue.Queue()
         full_path = os.path.join(Utils.cfg_path, 'hs300.csv')

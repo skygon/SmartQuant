@@ -8,23 +8,24 @@ sys.path.append(os.path.join(os.getcwd(), 'tech_index'))
 from macd import MACD
 from rsi import RSI
 from kdj import KDJ
-from volume import Volume
+from VolumeMotivation import VolumeMotivation
 from utils import *
 
 tp_num = 1
 class SingleIndex(threading.Thread):
     def __init__(self, index_type='macd'):
         threading.Thread.__init__(self)
-        #self.que = Utils.getHS300Queue()
-        self.que = g_utils.hs300_que
+        self.que = g_utils.sz50_que
+        #self.que = g_utils.hs300_que
+        #self.que = g_utils.zz500_que
         if index_type == 'macd':
             self.index_obj = MACD('000001')
         elif index_type == 'rsi':
             self.index_obj = RSI('000001')
         elif index_type == 'kdj':
             self.index_obj = KDJ('000001')
-        elif index_type == 'volume':
-            self.index_obj = Volume('000001')
+        elif index_type == 'vol_motivation':
+            self.index_obj = VolumeMotivation()
         
         print self.index_obj.current_date
         self.start()
@@ -59,7 +60,7 @@ class SingleIndex(threading.Thread):
 if __name__ =="__main__":
     threads = []
     for i in range(tp_num):
-        t = SingleIndex('volume')
+        t = SingleIndex('vol_motivation')
         threads.append(t)
     
     for t in threads:

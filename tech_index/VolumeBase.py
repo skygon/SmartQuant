@@ -13,6 +13,7 @@ class VolumeBase(object):
         self.rtda = RTDA()
         self.getCurrentDate()
 
+
     def setCode(self, code):
         self.code = code
     
