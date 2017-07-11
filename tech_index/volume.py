@@ -35,11 +35,15 @@ class Volume(object):
         if today == self.current_date:
             return False
         
-        self.exit_invalid_code += 1
         return True
 
     def isNewStock(self):
         if len(self.close) < 200:
+            return True
+        return False
+
+    def isStartUp(self):
+        if self.code.find("300") == 0:
             return True
         return False
     
@@ -133,6 +137,9 @@ class Volume(object):
             self.prepareData()
             if self.invalidCode() or self.isNewStock():
                 self.exit_invalid_code += 1
+                return False
+            
+            if self.isStartUp():
                 return False
             
             if self.quickIncVolume(last_days['one']) is False:

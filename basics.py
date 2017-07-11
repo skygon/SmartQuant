@@ -43,9 +43,14 @@ class Basics(object):
     # zhong zheng 500
     def get_zz500(self):
         df = ts.get_zz500s()
-        df.to_csv('zz500.csv')
+        print df
+        #df.to_csv('zz500.csv')
+
+    def get_startUp(self):
+        df = ts.get_gem_classified()
+        df.to_csv('startup.csv')
 
 if __name__ == "__main__":
     b = Basics()
-    b.get_zz500()
-    #b.insertIndex('stock_basics.csv', 'stock_basic_refine.csv')
+    #b.get_zz500()
+    b.get_startUp()
