@@ -58,7 +58,10 @@ class TsWrapper(object):
         except Exception, e:
             print "get_hist_day_data_2 failed: %s" %(str(e))
     
-
+    def get_today_all(self):
+        df = ts.get_today_all()
+        return df
+    
     def update_hist_day_data(self):
         full_path = self.getFullPath('_hist_d.csv')
         df = DataFrame.from_csv(full_path)

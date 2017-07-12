@@ -8,27 +8,23 @@ class Tutorial(object):
         self.path = os.getcwd()
     
     def parseStockBasics(self):
-        full_path = os.path.join(self.path, 'config', 'stock_basics_refine.csv')
+        full_path = os.path.join(self.path, 'config', 'stock_basics.csv')
         df = DataFrame.from_csv(full_path)
-        print type(df)
-        print type(df.code)
-        print df.dtypes
-        print df.code.iloc[0]
         #print u'603933' == '603933'
-        print df[df['code'].isin(['603933', '603993'])]
+        return df
     
     def parseSZ50(self):
         full_path = os.path.join(self.path, 'config', 'sz50.csv')
         df = DataFrame.from_csv(full_path)
-        print df.code
-        print df[df.code.isin([600016,'600028'])]
+        return df
         #print df[df.code.isin(['600016','600028'])]
     
     def parseHS300(self):
         full_path = os.path.join(self.path, 'config', 'hs300.csv')
         df = DataFrame.from_csv(full_path)
         #print df.code
-        print df[df.code.isin([600016,'600028'])]
+        #print df[df.code.isin([600016,'600028'])]
+        return df
 
     def parseZZ500(self):
         full_path = os.path.join(self.path, 'config', 'zz500.csv')
@@ -44,5 +40,11 @@ class Tutorial(object):
 
 if __name__ == "__main__":
     t = Tutorial()
-    #t.parseStockBasics()
-    t.getDeltaHistData()
+    df = t.parseHS300()
+    
+    print df.columns
+    print df.index
+    print df.head(5)
+    ndf = df[['code', 'date']]
+    print type(ndf)
+    print ndf.head(5)
