@@ -55,8 +55,8 @@ def getHistDay_2(t):
 
 def updateHistDayRealTime(date_str):
     dc = DataCollector()
-    #df = dc.ts.get_today_all()
-    #df.to_csv('today_all.csv', encoding='utf-8')
+    df = dc.ts.get_today_all()
+    df.to_csv('today_all.csv', encoding='utf-8')
 
     df = DataFrame.from_csv('today_all.csv', encoding='utf-8')
     code = df.code.values
@@ -102,4 +102,4 @@ def updateHistDayRealTime(date_str):
 
 if __name__ == "__main__":
     #getHistDay_2('update_hist_day')
-    updateHistDayRealTime('2017-07-12')
+    updateHistDayRealTime('2017-07-13')

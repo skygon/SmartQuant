@@ -15,9 +15,10 @@ tp_num = 1
 class SingleIndex(threading.Thread):
     def __init__(self, index_type='macd'):
         threading.Thread.__init__(self)
-        self.que = g_utils.sz50_que
+        #self.que = g_utils.sz50_que
         #self.que = g_utils.hs300_que
         #self.que = g_utils.zz500_que
+        self.que = g_utils.full_queue
         if index_type == 'macd':
             self.index_obj = MACD('000001')
         elif index_type == 'rsi':
