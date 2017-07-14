@@ -53,7 +53,7 @@ def getHistDay_2(t):
             t.join()
 
 
-def updateHistDayRealTime(date_str):
+def updateToday(date_str):
     dc = DataCollector()
     df = dc.ts.get_today_all()
     df.to_csv('today_all.csv', encoding='utf-8')
@@ -99,7 +99,58 @@ def updateHistDayRealTime(date_str):
             print "updateHistDayRealTime error: %s" %(str(e))
 
 
+def updateTodayRealTime(date_str):
+    dc = DataCollector()
+    #df = dc.ts.get_today_all()
+    #df.to_csv('today_all.csv', encoding='utf-8')
+
+    df = DataFrame.from_csv('today_all.csv', encoding='utf-8')
+    code = df.code.values
+    close = df.trade.values
+    open = df.open.values
+    high = df.high.values
+    low = df.low.values
+    volume = df.volume.values
+    for i in range(len(code)):
+        try:
+            c = str(code[i])
+            if len(c) < 6:
+                c = "0" * (6 - len(c)) + c
+            file_name = c + '_hist_d.csv'
+            full_path = os.path.join(dc.hist_day_path, file_name)
+            df = DataFrame.from_csv(full_path)
+            last_frame = df.tail(1)
+            offset = df.shape[0]
+
+            data = {}
+            data['date'] = [date_str]
+            data['open'] = [open[i]]
+            data['close'] = [close[i]]
+            data['high'] = [high[i]]
+            data['low'] = [low[i]]
+            data['volume'] = [float(volume[i]) / 100]
+            data['code'] = [c]
+
+            delta_df = DataFrame.from_dict(data)
+            delta_df = delta_df[['date', 'open', 'close', 'high', 'low', 'volume', 'code']]
+
+            date_string = last_frame.iloc[0,0] # date is the first cell of on row
+            if (date_string == date_str):
+                # update today's data
+                delta_df = delta_df.set_index([[offset-1]], inplace=True)
+                df.update(delta_df)
+                df.to_csv(full_path)
+            
+            else:
+                # first time update, just append to the origin file
+                delta_df = delta_df.set_index([[offset]])
+                delta_df.to_csv(full_path, mode='a', header=None)
+            
+        except Exception, e:
+            print "updateHistDayRealTime error: %s" %(str(e))
+
 
 if __name__ == "__main__":
     #getHistDay_2('update_hist_day')
-    updateHistDayRealTime('2017-07-13')
+    #updateToday('2017-07-14')
+    updateTodayRealTime('2017-07-14')
