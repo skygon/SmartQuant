@@ -101,9 +101,10 @@ def updateToday(date_str):
 
 def updateTodayRealTime(date_str):
     dc = DataCollector()
-    #df = dc.ts.get_today_all()
-    #df.to_csv('today_all.csv', encoding='utf-8')
+    df = dc.ts.get_today_all()
+    df.to_csv('today_all.csv', encoding='utf-8')
 
+    return
     df = DataFrame.from_csv('today_all.csv', encoding='utf-8')
     code = df.code.values
     close = df.trade.values
