@@ -73,11 +73,11 @@ class VolumeMotivation(VolumeBase):
             
             if data[0]['kuvolume'] < data[0]['kdvolume']:
                 return False
-            #if float(data[0]['kuvolume']) == 0:
-            #    return False
+            if float(data[0]['kuvolume']) == 0:
+                return False
             
-            #if float(data[0]['kdvolume']) / float(data[0]['kuvolume']) > 1.2:
-            #    return False
+            if float(data[0]['kdvolume']) / float(data[0]['kuvolume']) > 1.2:
+                return False
             
             return True
         except Exception, e:
