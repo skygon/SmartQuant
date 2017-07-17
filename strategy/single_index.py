@@ -9,6 +9,7 @@ from macd import MACD
 from rsi import RSI
 from kdj import KDJ
 from VolumeMotivation import VolumeMotivation
+from DawnStar import DawnStar
 from utils import *
 
 tp_num = 1
@@ -17,8 +18,8 @@ class SingleIndex(threading.Thread):
         threading.Thread.__init__(self)
         #self.que = g_utils.sz50_que
         #self.que = g_utils.hs300_que
-        self.que = g_utils.zz500_que
-        #self.que = g_utils.full_queue
+        #self.que = g_utils.zz500_que
+        self.que = g_utils.full_queue
         if index_type == 'macd':
             self.index_obj = MACD('000001')
         elif index_type == 'rsi':
@@ -27,6 +28,8 @@ class SingleIndex(threading.Thread):
             self.index_obj = KDJ('000001')
         elif index_type == 'vol_motivation':
             self.index_obj = VolumeMotivation()
+        elif index_type == 'k-dawnstar':
+            self.index_obj = DawnStar()
         
         print self.index_obj.current_date
         self.start()
@@ -61,7 +64,7 @@ class SingleIndex(threading.Thread):
 if __name__ =="__main__":
     threads = []
     for i in range(tp_num):
-        t = SingleIndex('vol_motivation')
+        t = SingleIndex('k-dawnstar')
         threads.append(t)
     
     for t in threads:

@@ -45,7 +45,10 @@ class VolumeBase(object):
         full_path = os.path.join(self.hist_day_path, file_name)
 
         self.df = DataFrame.from_csv(full_path)
+        self.open = self.df.open.values
         self.close = self.df.close.values
+        self.high = self.df.high.values
+        self.low = self.df.low.values
         self.volume = self.df.volume.values
         self.date = self.df.date.values
     
