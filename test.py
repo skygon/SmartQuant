@@ -37,14 +37,15 @@ class Tutorial(object):
         ndf = df.set_index([[0,1]])
         #ndf = df.reset_index()
         print ndf
+    
+    def getTickData(self):
+        df = ts.get_k_data('603993', ktype='5', start='2017-07-18', end='2017-07-18')
+        return df
 
 if __name__ == "__main__":
     t = Tutorial()
-    df = t.parseHS300()
+    df = t.getTickData()
+    #print df.head(10)
+    #print df.code.isin(['603993'])
+    print df[df.date.str.contains('2017-07-18')]
     
-    print df.columns
-    print df.index
-    print df.head(5)
-    ndf = df[['code', 'date']]
-    print type(ndf)
-    print ndf.head(5)
