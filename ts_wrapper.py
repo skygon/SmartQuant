@@ -61,6 +61,10 @@ class TsWrapper(object):
     def get_today_all(self):
         df = ts.get_today_all()
         return df
+
+    def getTick5Data(self, code, date_str):
+        df = ts.get_k_data(code, ktype='5', start=date_str, end=date_str)
+        return df
     
     def update_hist_day_data(self):
         full_path = self.getFullPath('_hist_d.csv')

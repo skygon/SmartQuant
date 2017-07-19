@@ -13,13 +13,14 @@ from DawnStar import DawnStar
 from utils import *
 
 tp_num = 1
+#g_class_gue = g_utils.sz50_que
+g_class_gue = g_utils.hs300_que
+#g_class_gue = g_utils.zz500_que
+#g_class_gue = g_utils.full_queue
+
 class SingleIndex(threading.Thread):
     def __init__(self, index_type='macd'):
         threading.Thread.__init__(self)
-        #self.que = g_utils.sz50_que
-        #self.que = g_utils.hs300_que
-        #self.que = g_utils.zz500_que
-        self.que = g_utils.full_queue
         if index_type == 'macd':
             self.index_obj = MACD('000001')
         elif index_type == 'rsi':
@@ -49,7 +50,7 @@ class SingleIndex(threading.Thread):
     def run(self):
         while True:
             try:
-                code = self.que.get(False)
+                code = g_class_gue.get(False)
                 code = self.handleNumericCode(code)
                 self.processOneCode(code)
             except Queue.Empty:
