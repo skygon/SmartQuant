@@ -109,4 +109,4 @@ def updateTodayRealTime(date_str):
 if __name__ == "__main__":
     #getHistDay_2('update_hist_day')
     #updateToday('2017-07-14')
-    updateTodayRealTime('2017-07-19')
+    updateTodayRealTime('2017-07-20')
