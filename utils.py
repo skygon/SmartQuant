@@ -33,6 +33,9 @@ class Utils(object):
         self.hs300_que = self.getHS300QueueIns()
         self.zz500_que = self.getZZ500QueueIns()
         self.hs300_zz500_que = self.getHS300AndZZ500Ins()
+
+        # message that will be pushed to client
+        self.msg_queue = Queue.Queue()
     
     @staticmethod
     def save2CSVFile(df, full_path, enc='utf-8'):
@@ -124,6 +127,9 @@ class Utils(object):
 
 g_utils = Utils()
 
+# ==========================
+def put2MsgQue(msg):
+    g_utils.msg_queue.put(msg)
 
 if __name__ == "__main__":
     que = Utils.getHS300AndZZ500()
