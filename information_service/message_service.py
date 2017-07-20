@@ -3,14 +3,17 @@ import sys
 import json
 sys.path.append(os.getcwd())
 from realtime_index import RealtimeIndex
+from message_pusher import Pusher
 from utils import *
+import time
+
 
 class MessageService(object):
     def __init__(self):
         self.config_file = os.path.join(os.getcwd(), "information_service", "myshares.json")
         self.stock_pool = []
         self.stock_conf = {}
-        self.puhser = []
+        self.worker = []
         self.parseStockConf()
 
     def parseStockConf(self):
@@ -28,15 +31,19 @@ class MessageService(object):
 
     def start(self):
         # start message pusher service
-        # TODO
+        self.pusher = Pusher()
+        self.pusher.start()
+
+        # query realtime index
         for i in range(len(self.stock_pool)):
             r = RealtimeIndex()
             r.setCode(self.stock_pool[i])
             r.start()
         
-        for r in self.puhser:
-            if r.isAlive():
-                r.join()
+        # empty loop
+        while True:
+            print "....................."
+            time.sleep(5)
 
 if __name__ == "__main__":
     m = MessageService()
