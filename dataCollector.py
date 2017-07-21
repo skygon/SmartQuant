@@ -1,6 +1,7 @@
 import os
 import threading
 import Queue
+import tushare as ts
 from ts_wrapper import TsWrapper
 import pandas
 from utils import *
@@ -73,7 +74,12 @@ def updateTodayRealTime(date_str):
                 c = "0" * (6 - len(c)) + c
             file_name = c + '_hist_d.csv'
             full_path = os.path.join(dc.hist_day_path, file_name)
-            #TODO if file dose not exist, load the whole hist data
+            # if file dose not exist, load the whole hist data
+            if os.path.isfile(full_path) is False:
+                df = ts.get_k_data(c, ktype='D')
+                df.to_csv(full_path, encoding="utf-8")
+                continue
+
             df = DataFrame.from_csv(full_path)
             last_frame = df.tail(1)
             offset = df.shape[0]
