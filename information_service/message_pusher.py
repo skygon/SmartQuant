@@ -9,11 +9,15 @@ import time
 
 
 class Pusher(threading.Thread):
-    def __init__(self):
+    def __init__(self, conf):
         threading.Thread.__init__(self)
+        self.conf = conf
     
     def handlePriceMsg(self):
-        msg = ':'.join(self.data)
+        #msg = ':'.join(self.data)
+        msg = None
+        price = float(self.data[2])
+        if price < 
         return msg
 
     def parseMessage(self, data):
@@ -31,6 +35,7 @@ class Pusher(threading.Thread):
             try:
                 item = g_utils.msg_queue.get()
                 msg = self.parseMessage(item)
+                msg = "@skygon " + msg
                 if msg is not None:
                     itchat.send_msg(msg ,"filehelper")
             except Exception, e:

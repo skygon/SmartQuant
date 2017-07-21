@@ -31,7 +31,7 @@ class MessageService(object):
 
     def start(self):
         # start message pusher service
-        self.pusher = Pusher()
+        self.pusher = Pusher(self.stock_conf)
         self.pusher.start()
 
         # query realtime index
