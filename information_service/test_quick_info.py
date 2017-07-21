@@ -15,8 +15,14 @@ class QuickInfo(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
 
+
     def getFirstPage(self):
-        try:           
+        try:
+            # httpHandler = urllib2.HTTPHandler(debuglevel=1)
+            # httpsHandler = urllib2.HTTPSHandler(debuglevel=1)
+            # opener = urllib2.build_opener(httpHandler, httpsHandler)
+            # urllib2.install_opener(opener)
+            
             headers = {}
             headers['Accept'] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
             headers['User-Agent'] = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
@@ -28,24 +34,26 @@ class QuickInfo(threading.Thread):
             ret = response.getcode()
             if (ret != 200):
                 raise Exception("response error")
-        
+            
+            print response.info()
             raw = response.read()
-            self.data = json.loads(raw)
+            #text = raw.decode('utf-8') #codec is from response.info()
+            #with open("quick_info", 'w') as f:
+            #  f.write(raw)
+            data = json.loads(raw)
+            print type(data)
+            ticket = json.loads(data['list'][0]['data'].encode('utf-8'))
+            print ticket['mark']
+            print type(ticket['text'])
+            
+            # itchat send unicode
+            itchat.auto_login(True)
+            itchat.send_msg(ticket['text'], "filehelper")
         except Exception, e:
             print "get first page failed [%s]" %(str(e))
-
-    def testSend(self):
-        ticket = json.loads(self.data['list'][0]['data'].encode('utf-8'))
-        itchat.auto_login(True)
-        itchat.send_msg(ticket['text'], "filehelper")
         
     def run(self):
-        while True:
-            try:
-                self.getFirstPage()
-                self.consume()
-            except Exception, e:
-                print "market information fetch failed [%s]" %(str(e))
+        pass
 
 if __name__ == "__main__":
     qi = QuickInfo()
