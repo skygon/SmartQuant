@@ -38,7 +38,7 @@ class RealtimeIndex(threading.Thread):
                     msg = self.flag + ":" + self.code + ":" + current_price
                     print "message is [%s]" %(msg)
                     put2MsgQue(msg)
-                time.sleep(5)
+                time.sleep(3)
             except Exception, e:
                 print "Get Exception in getting info from code[%s]: [%s]" %(self.code, str(e))
 
