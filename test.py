@@ -1,3 +1,4 @@
+#encoding=utf-8
 from pandas import DataFrame
 import tushare as ts
 import time
@@ -39,13 +40,11 @@ class Tutorial(object):
         print ndf
     
     def getTickData(self):
-        df = ts.get_k_data('603993', ktype='5', start='2017-07-18', end='2017-07-18')
+        df = ts.get_k_data('603993', ktype='5', start='2017-07-18', end='2017-07-21')
         return df
 
 if __name__ == "__main__":
     t = Tutorial()
     df = t.getTickData()
-    #print df.head(10)
-    #print df.code.isin(['603993'])
-    print df[df.date.str.contains('2017-07-18')]
+
     
