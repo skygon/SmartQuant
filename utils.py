@@ -23,12 +23,7 @@ class Utils(object):
         # config files:
         self.sh_a = os.path.join(self.cfg_path, 'sh_a.txt')
         self.sz_a = os.path.join(self.cfg_path, 'sz_a.txt')
-        # queues. full_queue is used for multithreading workers to process code sets.
-        # Thus it's should be a singlton queue. Used from g_utils
-        #self.full_queue = Queue.Queue()
-        #self.read_to_queue(self.sh_a, self.full_queue)
-        #self.read_to_queue(self.sz_a, self.full_queue)
-
+        
         # full queue from today_all, latest data
         self.full_queue = self.getFullQueIns()
         self.sz50_que = self.getSZ50QueueIns()
