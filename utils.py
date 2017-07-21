@@ -25,10 +25,12 @@ class Utils(object):
         self.sz_a = os.path.join(self.cfg_path, 'sz_a.txt')
         # queues. full_queue is used for multithreading workers to process code sets.
         # Thus it's should be a singlton queue. Used from g_utils
-        self.full_queue = Queue.Queue()
-        self.read_to_queue(self.sh_a, self.full_queue)
-        self.read_to_queue(self.sz_a, self.full_queue)
+        #self.full_queue = Queue.Queue()
+        #self.read_to_queue(self.sh_a, self.full_queue)
+        #self.read_to_queue(self.sz_a, self.full_queue)
 
+        # full queue from today_all, latest data
+        self.full_queue = self.getFullQueIns()
         self.sz50_que = self.getSZ50QueueIns()
         self.hs300_que = self.getHS300QueueIns()
         self.zz500_que = self.getZZ500QueueIns()
@@ -100,6 +102,16 @@ class Utils(object):
                 break
         
         return que1
+    
+    def getFullQueIns(self):
+        que = Queue.Queue()
+        full_path = os.path.join(os.getcwd(), "today_all.csv")
+        df = DataFrame.from_csv(full_path)
+        codes = df.code.values
+        for c in codes:
+            que.put(c)
+        
+        return que
 
     @staticmethod
     def getZZ500Queue():
@@ -133,4 +145,4 @@ def put2MsgQue(msg):
 
 if __name__ == "__main__":
     que = Utils.getHS300AndZZ500()
-    print que.qsize()
+    #print que.qsize()

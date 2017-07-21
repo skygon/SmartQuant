@@ -73,6 +73,7 @@ def updateTodayRealTime(date_str):
                 c = "0" * (6 - len(c)) + c
             file_name = c + '_hist_d.csv'
             full_path = os.path.join(dc.hist_day_path, file_name)
+            #TODO if file dose not exist, load the whole hist data
             df = DataFrame.from_csv(full_path)
             last_frame = df.tail(1)
             offset = df.shape[0]
