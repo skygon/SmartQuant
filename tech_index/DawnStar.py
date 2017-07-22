@@ -28,7 +28,8 @@ class DawnStar(VolumeBase):
         
         return True
 
-    # 跳空低开，十字星
+    # 跳空低开，十字星; 
+    # TODO 另一种形态是连续两天的十字星
     def checkDay_2(self):
         if self.open[last_days['two']] > self.close[last_days['three']]:
             return False

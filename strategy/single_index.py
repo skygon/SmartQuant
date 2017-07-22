@@ -10,11 +10,13 @@ from rsi import RSI
 from kdj import KDJ
 from VolumeMotivation import VolumeMotivation
 from DawnStar import DawnStar
+from TickPrice import TickPrice
 from utils import *
 
 tp_num = 1
 #g_class_gue = g_utils.sz50_que
-g_class_gue = g_utils.hs300_que
+#g_class_gue = g_utils.hs300_que
+g_class_gue = g_utils.hs300_zz500_que
 #g_class_gue = g_utils.zz500_que
 #g_class_gue = g_utils.full_queue
 
@@ -31,6 +33,8 @@ class SingleIndex(threading.Thread):
             self.index_obj = VolumeMotivation()
         elif index_type == 'k-dawnstar':
             self.index_obj = DawnStar()
+        elif index_type == 'tick_price':
+            self.index_obj = TickPrice('2017-07-20')
         
         print self.index_obj.current_date
         self.start()
@@ -65,7 +69,7 @@ class SingleIndex(threading.Thread):
 if __name__ =="__main__":
     threads = []
     for i in range(tp_num):
-        t = SingleIndex('k-dawnstar')
+        t = SingleIndex('tick_price')
         threads.append(t)
     
     for t in threads:
