@@ -24,6 +24,7 @@ class TickPrice(VolumeBase):
         self.exit_count = 0
         self.exit_price = 0
         self.exit_volume = 0
+        self.accept_no_down_count = 0
         self.initStatisticData()
 
     def setDate(self, date_str):
@@ -79,10 +80,17 @@ class TickPrice(VolumeBase):
 
 
     def simple_1(self):
+        self.total += 1
         if self.down['count'] == 0:
+            if self.up['count'] == 0:
+                return False
+            
+            self.accept_no_down_count += 1
+            self.stock_pool += 1
             return True
         
-        if self.up['count'] / float(self.down['count']) < 1.3:
+        if self.up['count'] / float(self.down['count']) < 1.5:
+            #print "up : %s down : %s" %(self.up['count'], self.down['count'])
             self.exit_count += 1
             return False
        
@@ -93,12 +101,14 @@ class TickPrice(VolumeBase):
         if self.up['volume'] / self.down['volume'] < 1.5:
             self.exit_volume += 1
             return False
-
+        
+        self.stock_pool += 1
         return True
 
     
     def canBuy(self):
         try:
+            self.initStatisticData()
             self.prepareDataFromDisk()
             self.getSummary()
             return self.simple_1()
@@ -111,6 +121,7 @@ class TickPrice(VolumeBase):
         print "==== exit from count : %s" %(self.exit_count)
         print "==== exit from price : %s" %(self.exit_price)
         print "==== exit from volume : %s" %(self.exit_volume)
+        print "==== accept because no down count: %s" %(self.accept_no_down_count)
         print "==== stock pool : %s" %(self.stock_pool)
 
 if __name__ == "__main__":
