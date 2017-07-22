@@ -9,6 +9,7 @@ class TsWrapper(object):
     def __init__(self, code):
         self.code = code
         self.hist_day_data_path = os.path.join(os.getcwd(), 'hist_data', 'day')
+        self.tick_data_path = os.path.join(os.getcwd(), 'tick_data')
     
     def setCode(self, new_code):
         self.code = new_code
@@ -62,9 +63,11 @@ class TsWrapper(object):
         df = ts.get_today_all()
         return df
 
-    def getTick5Data(self, code, date_str):
-        df = ts.get_k_data(code, ktype='5', start=date_str, end=date_str)
-        return df
+    def getTick5Data(self):
+        df = ts.get_k_data(self.code, ktype='5')
+        file_name = self.code + ".csv"
+        full_path = os.path.join(self.tick_data_path, file_name)
+        df.to_csv(full_path)
     
     def update_hist_day_data(self):
         full_path = self.getFullPath('_hist_d.csv')
@@ -90,4 +93,4 @@ class TsWrapper(object):
 if __name__ == "__main__":
     #tw = TsWrapper('603993')
     tw = TsWrapper('000001')
-    tw.get_hist_day_data_2()
+    tw.getTick5Data()

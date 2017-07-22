@@ -15,9 +15,16 @@ class DataCollector(threading.Thread):
         self.hist_day_path = os.path.join(os.getcwd(), 'hist_data', 'day')
         self.ts = TsWrapper('000001')
         #self.start()
-
+    
+    def handleNumericCode(slef, code):
+        c = str(code)
+        if len(c) < 6:
+            c = "0" * (6 - len(c)) + c
+        
+        return c
     
     def processOneCode(self, code):
+        code = self.handleNumericCode(code)
         self.ts.setCode(code)
         if self.type == 'hist_day':
             self.ts.get_hist_day_data()
@@ -25,8 +32,8 @@ class DataCollector(threading.Thread):
             self.ts.get_hist_day_data_2()
         elif self.type == 'update_hist_day':
             self.ts.update_hist_day_data()
-        elif self.type == 'upadte_hist_day_2':
-            self.ts.update_hist_day_data_2()
+        elif self.type == 'tick_data':
+            self.ts.getTick5Data()
     
 
     def run(self):
@@ -42,7 +49,7 @@ class DataCollector(threading.Thread):
                 print "DataCollection Error : %s \n" %(str(e))
 
 
-def getHistDay_2(t):
+def fetchData(t):
     threads = []
     for i in range(thread_poll_num):
         dc = DataCollector(t)
@@ -52,7 +59,6 @@ def getHistDay_2(t):
         t.start()
         if t.isAlive():
             t.join()
-
 
 
 def updateTodayRealTime(date_str):
@@ -114,6 +120,5 @@ def updateTodayRealTime(date_str):
 
 
 if __name__ == "__main__":
-    #getHistDay_2('update_hist_day')
-    #updateToday('2017-07-14')
-    updateTodayRealTime('2017-07-21')
+    fetchData('tick_data')
+    #updateTodayRealTime('2017-07-21')
