@@ -82,10 +82,13 @@ def updateTodayRealTime(date_str):
             full_path = os.path.join(dc.hist_day_path, file_name)
             # if file dose not exist, load the whole hist data
             if os.path.isfile(full_path) is False:
+                print "new code : %s" %(c)
                 df = ts.get_k_data(c, ktype='D')
                 df.to_csv(full_path, encoding="utf-8")
                 continue
-
+            #else:
+            #    continue
+            
             df = DataFrame.from_csv(full_path)
             last_frame = df.tail(1)
             offset = df.shape[0]
@@ -120,5 +123,5 @@ def updateTodayRealTime(date_str):
 
 
 if __name__ == "__main__":
-    fetchData('tick_data')
-    #updateTodayRealTime('2017-07-21')
+    #fetchData('tick_data')
+    updateTodayRealTime('2017-07-23')

@@ -16,9 +16,9 @@ from utils import *
 tp_num = 1
 #g_class_gue = g_utils.sz50_que
 #g_class_gue = g_utils.hs300_que
-g_class_gue = g_utils.hs300_zz500_que
+#g_class_gue = g_utils.hs300_zz500_que
 #g_class_gue = g_utils.zz500_que
-#g_class_gue = g_utils.full_queue
+g_class_gue = g_utils.full_queue
 
 class SingleIndex(threading.Thread):
     def __init__(self, index_type='macd'):
@@ -69,7 +69,7 @@ class SingleIndex(threading.Thread):
 if __name__ =="__main__":
     threads = []
     for i in range(tp_num):
-        t = SingleIndex('tick_price')
+        t = SingleIndex('vol_motivation')
         threads.append(t)
     
     for t in threads:
