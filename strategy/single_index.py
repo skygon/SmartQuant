@@ -34,7 +34,7 @@ class SingleIndex(threading.Thread):
         elif index_type == 'k-dawnstar':
             self.index_obj = DawnStar()
         elif index_type == 'tick_price':
-            self.index_obj = TickPrice('2017-07-20')
+            self.index_obj = TickPrice('2017-07-19')
         
         print self.index_obj.current_date
         self.start()

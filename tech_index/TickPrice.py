@@ -125,7 +125,7 @@ class TickPrice(VolumeBase):
         print "==== stock pool : %s" %(self.stock_pool)
 
 if __name__ == "__main__":
-    t = TickPrice('2017-07-20')
+    t = TickPrice('2017-07-19')
     t.setCode('603993')
     t.prepareDataFromDisk()
     print t.df
