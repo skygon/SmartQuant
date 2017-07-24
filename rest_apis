@@ -1,0 +1,4 @@
+按行业分类：
+http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C.BK04211&sty=FCOIATA&sortType=C&sortRule=-1&page=1&pageSize=20&js=var%20quote_123%3d{rank:[(x)],pages:(pc)}&token=7bc05d0d4c3c22ef9fca8c2a912d779c&jsName=quote_123&_g=0.1923871021689061
+
+通过返回信息的pages指示是否还有后续的page。 cmd指示行业信息
