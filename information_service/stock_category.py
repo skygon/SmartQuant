@@ -1,3 +1,4 @@
+#coding=utf-8
 import os
 import sys
 import json
@@ -36,6 +37,7 @@ class Category(threading.Thread):
             print text
             data = json.loads(text)
             print type(data)
+            print data
         except Exception, e:
             print "Category getPages failed %s" %(str(e))
 
