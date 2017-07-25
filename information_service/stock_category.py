@@ -51,7 +51,7 @@ class Category(threading.Thread):
                     s = iarray[i].encode('utf-8')
                     sa = s.split(',')
                     icode = sa[1] + "1"
-                    print icode
+                    
         except Exception, e:
             print "get full category failed %s" %(str(e))
             
