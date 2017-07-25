@@ -15,12 +15,13 @@ class Category(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         self.token = "7bc05d0d4c3c22ef9fca8c2a912d779c"
+        self.category = {}
         
-    def getPages(self, category_code):
+    def getPage(self, category_code, page):
         try:
             print "base url %s" %(industry_base_url)
             url = urllib2.unquote(industry_base_url).decode('utf8') 
-            url = url %(category_code, str(1), self.token)
+            url = url %(category_code, str(page), self.token)
             
             print "url: %s" %(url)
             request = urllib2.Request(url)
@@ -34,14 +35,27 @@ class Category(threading.Thread):
             text = raw.split('=')[1]
             text = text.replace('rank', '"rank"')
             text = text.replace('pages', '"pages"')
-            print text
             data = json.loads(text)
-            print type(data)
-            print data
+            
         except Exception, e:
             print "Category getPages failed %s" %(str(e))
 
-
+    def getFullCategory(self):
+        try:
+            full_path = os.path.join(os.getcwd(), "information_service", "industry_map_dfcfw.list")
+            with open(full_path, 'r') as f:
+                imap = json.load(f, encoding='utf-8')
+                #print imap['total']
+                iarray = imap['total']
+                for i in range(len(iarray)):
+                    s = iarray[i].encode('utf-8')
+                    sa = s.split(',')
+                    icode = sa[1] + "1"
+                    print icode
+        except Exception, e:
+            print "get full category failed %s" %(str(e))
+            
+    
     def run(self):
         while True:
             try:
@@ -51,4 +65,4 @@ class Category(threading.Thread):
 
 if __name__ == "__main__":
     ca = Category()
-    ca.getPages("C.BK04211")
+    ca.getFullCategory()
