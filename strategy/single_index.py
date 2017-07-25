@@ -17,8 +17,8 @@ tp_num = 1
 #g_class_gue = g_utils.sz50_que
 #g_class_gue = g_utils.hs300_que
 #g_class_gue = g_utils.hs300_zz500_que
-#g_class_gue = g_utils.zz500_que
-g_class_gue = g_utils.full_queue
+g_class_gue = g_utils.zz500_que
+#g_class_gue = g_utils.full_queue
 
 class SingleIndex(threading.Thread):
     def __init__(self, index_type='macd'):
