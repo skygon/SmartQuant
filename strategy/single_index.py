@@ -11,6 +11,7 @@ from kdj import KDJ
 from VolumeMotivation import VolumeMotivation
 from DawnStar import DawnStar
 from TickPrice import TickPrice
+from shake import Shake
 from utils import *
 
 tp_num = 1
@@ -35,6 +36,8 @@ class SingleIndex(threading.Thread):
             self.index_obj = DawnStar()
         elif index_type == 'tick_price':
             self.index_obj = TickPrice('2017-07-19')
+        elif index_type == 'shake':
+            self.index_obj = Shake()
         
         print self.index_obj.current_date
         self.start()
@@ -69,7 +72,7 @@ class SingleIndex(threading.Thread):
 if __name__ =="__main__":
     threads = []
     for i in range(tp_num):
-        t = SingleIndex('vol_motivation')
+        t = SingleIndex('shake')
         threads.append(t)
     
     for t in threads:
