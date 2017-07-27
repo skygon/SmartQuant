@@ -17,6 +17,22 @@ class VolumeBase(object):
     def setCode(self, code):
         self.code = code
     
+    def getPriceMA(self, day_index, interval):
+        try:
+            total = 0
+            for i in range(interval):
+                total += self.close[day_index - i]
+            
+            ma = float(total) / interval
+            return ma
+        except Exception, e:
+            print "getPriceMA failed %s" %(str(e))
+
+    def getMA(self, day_index, type='price', interval=5):
+        if type == 'price':
+            return self.getPriceMA(day_index, interval)
+
+
     def getCurrentDate(self):
         file_name = '601988_hist_d.csv' # china bank
         full_path = os.path.join(self.hist_day_path, file_name)
