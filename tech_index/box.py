@@ -19,7 +19,7 @@ class Box(VolumeBase):
         self.box_len = 120
         self.partition = 3
         self.max_shake = 0.3
-        self.enter = 0.1
+        self.enter = 0.08
 
     def isNewStock(self):
         if len(self.close) < self.box_len:
