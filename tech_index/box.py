@@ -18,16 +18,17 @@ class Box(VolumeBase):
         self.test = True
 
         if self.test:
-            self.start_day = -20
+            self.start_day = -30
             last_days['one'] = self.start_day
         else:
             self.start_day = -1  # we can set this to early days for test
 
         super(Box, self).__init__()
         self.box_len = 180
-        self.partition = 3
+        self.partition = 4
         self.max_shake = 0.4
-        self.enter = 0.03
+        self.uniform_shake = 0.06
+        self.enter = 0.04
 
     def isNewStock(self):
         if len(self.close) < self.box_len + abs(self.start_day):
@@ -74,7 +75,7 @@ class Box(VolumeBase):
                 for j in range(start, end, -1):
                     high.append(self.high[j])
                     high.sort(reverse=True)
-                if abs(high[1] - self.max_high) / self.max_high > 0.03:
+                if abs(high[1] - self.max_high) / self.max_high > self.uniform_shake:
                     return False
                 lh.append(high[1])
             #print "three highs: %s" %(lh)
