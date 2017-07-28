@@ -15,15 +15,21 @@ class Box(VolumeBase):
         self.exit_check_price = 0
         self.exit_current_price = 0
         self.rt = RealtimePrice()
+        self.box_len = 180
 
+    def isNewStock(self):
+        if len(self.close) < self.box_len:
+            return True
+        return False
 
+    
     def checkPrice(self):
         try:
             high = []
             low = []
             self.max_high = 0.0
             self.min_low = 0.0
-            for i in range(-1, -120, -1):
+            for i in range(-1, -self.box_len, -1):
                 high.append(self.high[i])
                 low.append(self.low[i])
 
@@ -34,7 +40,7 @@ class Box(VolumeBase):
             if low[1] == 0:
                 return False
             
-            if (high[1] - low[1]) / low[1] < 0.15:
+            if (high[1] - low[1]) / low[1] < 0.2:
                 self.max_high = high[1]
                 self.min_low = low[1]
                 print "high : %s, low : %s" %(high[1], low[1])
@@ -50,7 +56,7 @@ class Box(VolumeBase):
                 c = "sh" + self.code
             else:
                 c = "sz" + self.code
-                
+
             self.rt.setCode(c)
             cp = self.rt.getCurrentPrice()
             if (cp - self.min_low) / self.min_low < 0.02:
