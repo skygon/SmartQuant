@@ -12,6 +12,7 @@ from VolumeMotivation import VolumeMotivation
 from DawnStar import DawnStar
 from TickPrice import TickPrice
 from shake import Shake
+from box import Box
 from utils import *
 
 tp_num = 1
@@ -38,6 +39,8 @@ class SingleIndex(threading.Thread):
             self.index_obj = TickPrice('2017-07-19')
         elif index_type == 'shake':
             self.index_obj = Shake()
+        elif index_type == 'box':
+            self.index_obj = Box()
         
         print self.index_obj.current_date
         self.start()
@@ -72,7 +75,7 @@ class SingleIndex(threading.Thread):
 if __name__ =="__main__":
     threads = []
     for i in range(tp_num):
-        t = SingleIndex('shake')
+        t = SingleIndex('box')
         threads.append(t)
     
     for t in threads:

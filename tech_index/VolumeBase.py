@@ -47,7 +47,7 @@ class VolumeBase(object):
         return True
 
     def isNewStock(self):
-        if len(self.close) < 200:
+        if len(self.close) < 120:
             return True
         return False
 
