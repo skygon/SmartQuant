@@ -9,20 +9,28 @@ from utils import *
 
 class Box(VolumeBase):
     def __init__(self):
-        super(Box, self).__init__()
         self.total = 0
         self.stock_pool = 0
         self.exit_check_price = 0
         self.exit_current_price = 0
         self.exit_uniform_distribute = 0
         self.rt = RealtimePrice()
-        self.box_len = 120
+        self.test = True
+
+        if self.test:
+            self.start_day = -20
+            last_days['one'] = self.start_day
+        else:
+            self.start_day = -1  # we can set this to early days for test
+
+        super(Box, self).__init__()
+        self.box_len = 180
         self.partition = 3
-        self.max_shake = 0.3
-        self.enter = 0.08
+        self.max_shake = 0.4
+        self.enter = 0.03
 
     def isNewStock(self):
-        if len(self.close) < self.box_len:
+        if len(self.close) < self.box_len + abs(self.start_day):
             return True
         return False
 
@@ -33,7 +41,7 @@ class Box(VolumeBase):
             low = []
             self.max_high = 0.0
             self.min_low = 0.0
-            for i in range(-1, -self.box_len, -1):
+            for i in range(self.start_day, -self.box_len+self.start_day, -1):
                 high.append(self.high[i])
                 low.append(self.low[i])
 
@@ -61,8 +69,8 @@ class Box(VolumeBase):
             for i in range(self.partition):
                 high = []
                 offset = 1 if i==0 else 0
-                start = i * (-step) - offset
-                end = (i+1) * (-step)
+                start = i * (-step) - offset + self.start_day + 1
+                end = (i+1) * (-step) + self.start_day + 1
                 for j in range(start, end, -1):
                     high.append(self.high[j])
                     high.sort(reverse=True)
@@ -74,6 +82,14 @@ class Box(VolumeBase):
         except Exception, e:
             print "uniformDistribute failed %s" %(str(e))
 
+
+    def checkCurrentPriceFake(self):
+        cp = self.low[self.start_day]
+        if (cp - self.min_low) / self.min_low < self.enter:
+            print "high : %s, low : %s, current: %s" %(self.max_high, self.min_low, cp)
+            return True
+            
+        return False
 
     def checkCurrentPrice(self):
         try:
@@ -115,7 +131,11 @@ class Box(VolumeBase):
                 self.exit_uniform_distribute += 1
                 return False
             
-            ret = self.checkCurrentPrice()
+            if self.test:
+                ret = self.checkCurrentPriceFake()
+            else:
+                ret = self.checkCurrentPrice()
+            
             if ret is False:
                 self.exit_current_price += 1
                 return False
