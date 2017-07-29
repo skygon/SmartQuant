@@ -8,7 +8,7 @@ from utils import *
 
 
 class Box(VolumeBase):
-    def __init__(self):
+    def __init__(self, start_day=-50):
         self.total = 0
         self.stock_pool = 0
         self.exit_check_price = 0
@@ -18,18 +18,26 @@ class Box(VolumeBase):
         self.test = True
 
         if self.test:
-            self.start_day = -30
+            self.start_day = start_day
             last_days['one'] = self.start_day
         else:
             self.start_day = -1  # we can set this to early days for test
 
         super(Box, self).__init__()
         self.box_len = 180
-        self.partition = 4
-        self.max_shake = 0.4
-        self.uniform_shake = 0.06
-        self.enter = 0.04
+        self.partition = 6
+        self.max_shake = 0.5
+        self.uniform_shake = 0.05
+        self.enter = 0.05
+        self.getStdDate()
 
+
+    def getStdDate(self):
+        file_name = '601988_hist_d.csv' # china bank
+        full_path = os.path.join(self.hist_day_path, file_name)
+        df = DataFrame.from_csv(full_path)
+        self.std_date = df.date.values
+    
     def isNewStock(self):
         if len(self.close) < self.box_len + abs(self.start_day):
             return True
@@ -148,13 +156,56 @@ class Box(VolumeBase):
 
     
     def analysis(self):
+        print "==== End day: %s" %(self.std_date[-self.box_len+self.start_day])
         print "==== total codes : %s" %(self.total)
         print "==== exit from check price : %s" %(self.exit_check_price)
         print "==== exit from uniform distribute : %s" %(self.exit_uniform_distribute)
         print "==== exit from current price: %s" %(self.exit_current_price)
         print "==== stock pool size is %s" %(self.stock_pool)
 
+
+class Test(object):
+    def __init__(self, start_day):
+        self.start_day = start_day
+        self.index_obj = Box(start_day)
+        self.count = 0
+        print self.index_obj.current_date
+
+    def processOneCode(self, code):
+        self.index_obj.setCode(code)
+        if self.index_obj.canBuy():
+            self.count += 1
+        
+    def handleNumericCode(slef, code):
+        c = str(code)
+        if len(c) < 6:
+            c = "0" * (6 - len(c)) + c
+        
+        return c
+
+    def test(self):
+        while True:
+            try:
+                code = g_utils.full_queue.get(False)
+                code = self.handleNumericCode(code)
+                self.processOneCode(code)
+            except Queue.Empty:
+                print "All works of single index have been done \n"
+                break
+            except Exception, e:
+                print "single index Error : %s \n" %(str(e))
+        
+        if self.count >= 5:
+            return True
+        
+        return False
+
+
+
 if __name__ == "__main__":
-    b = Box()
-    b.setCode("603993")
-    b.canBuy()
+    for i in range(-50, -120, -1):
+        t = Test(i)
+        if t.test():
+            print "look %s" %(t.start_day)
+            break
+    

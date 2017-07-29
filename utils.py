@@ -104,6 +104,9 @@ class Utils(object):
         df = DataFrame.from_csv(full_path)
         codes = df.code.values
         for c in codes:
+            c = str(c)
+            if len(c) < 6:
+                c = "0" * (6 - len(c)) + c
             que.put(c)
         
         return que
