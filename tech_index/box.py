@@ -184,9 +184,10 @@ class Test(object):
         return c
 
     def test(self):
+        full_queue = g_utils.getFullQueIns()
         while True:
             try:
-                code = g_utils.full_queue.get(False)
+                code = full_queue.get(False)
                 code = self.handleNumericCode(code)
                 self.processOneCode(code)
             except Queue.Empty:
@@ -203,7 +204,7 @@ class Test(object):
 
 
 if __name__ == "__main__":
-    for i in range(-50, -120, -1):
+    for i in range(-80, -120, -1):
         t = Test(i)
         if t.test():
             print "look %s" %(t.start_day)
