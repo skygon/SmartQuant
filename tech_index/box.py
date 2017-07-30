@@ -19,7 +19,7 @@ class Box(VolumeBase):
         self.test = True
 
         if self.test:
-            self.start_day = -64
+            self.start_day = start_day
             last_days['one'] = self.start_day
         else:
             self.start_day = -1  # we can set this to early days for test
@@ -92,6 +92,21 @@ class Box(VolumeBase):
         except Exception, e:
             print "uniformDistribute failed %s" %(str(e))
 
+    # dict 排序， 选出value 大于 self.max_high * 0.98的所有day_index, 观察是否均匀分布
+    def uniformDistribute_2(self):
+        dh_map = {}
+        for i in range(self.start_day, -self.box_len+self.start_day, -1):
+            dh_map[i] = self.high[i]
+        
+        # tuple_list is list of tuple, item is (day, price)
+        tuple_list = sorted(dh_map.items(), key=lambda x:x[1], reverse=True)
+        high_index = []
+        for i in range(len(tuple_list)):
+            if tuple_list[i][1] >= self.max_high * 0.98:
+                high_index.append(tuple_list[i][0])
+
+        # uniform distribute of high_index
+        # TODO
 
     def checkCurrentPriceFake(self):
         cp = self.low[self.start_day]
@@ -201,7 +216,7 @@ class Test(threading.Thread):
             except Exception, e:
                 print "single index Error : %s \n" %(str(e))
         
-        if self.count >= 5:
+        if self.count >= 3:
             print "=== try day: %s ===" %(self.start_day)
 
 
