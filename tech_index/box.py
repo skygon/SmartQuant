@@ -1,6 +1,7 @@
 #coding=utf-8
 import os
 import sys
+import threading
 sys.path.append(os.getcwd())
 from VolumeBase import VolumeBase
 from RealTimePrice import RealtimePrice
@@ -8,7 +9,7 @@ from utils import *
 
 
 class Box(VolumeBase):
-    def __init__(self, start_day=-50):
+    def __init__(self, start_day=-1):
         self.total = 0
         self.stock_pool = 0
         self.exit_check_price = 0
@@ -18,7 +19,7 @@ class Box(VolumeBase):
         self.test = True
 
         if self.test:
-            self.start_day = start_day
+            self.start_day = -64
             last_days['one'] = self.start_day
         else:
             self.start_day = -1  # we can set this to early days for test
@@ -164,12 +165,14 @@ class Box(VolumeBase):
         print "==== stock pool size is %s" %(self.stock_pool)
 
 
-class Test(object):
+class Test(threading.Thread):
     def __init__(self, start_day):
+        super(Test, self).__init__()
         self.start_day = start_day
         self.index_obj = Box(start_day)
         self.count = 0
         print self.index_obj.current_date
+        self.start()
 
     def processOneCode(self, code):
         self.index_obj.setCode(code)
@@ -183,12 +186,14 @@ class Test(object):
         
         return c
 
-    def test(self):
+    def run(self):
         full_queue = g_utils.getFullQueIns()
         while True:
             try:
                 code = full_queue.get(False)
                 code = self.handleNumericCode(code)
+
+                #print "%s get code %s" %(threading.currentThread().name, code)
                 self.processOneCode(code)
             except Queue.Empty:
                 print "All works of single index have been done \n"
@@ -197,16 +202,17 @@ class Test(object):
                 print "single index Error : %s \n" %(str(e))
         
         if self.count >= 5:
-            return True
-        
-        return False
+            print "=== try day: %s ===" %(self.start_day)
 
 
 
 if __name__ == "__main__":
-    for i in range(-80, -120, -1):
+    workers = []
+    for i in range(-60, -65, -1):
         t = Test(i)
-        if t.test():
-            print "look %s" %(t.start_day)
-            break
+        workers.append(t)
     
+    for t in workers:
+        if t.isAlive():
+            t.join()
+        
