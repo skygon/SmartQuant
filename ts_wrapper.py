@@ -44,6 +44,9 @@ class TsWrapper(object):
     def get_hist_day_data(self):
         try:
             df = ts.get_k_data(self.code, ktype='D')
+            if df.empty:
+                print "code[%s] return empty df" %(self.code)
+                return
             full_path = self.getFullPath('_hist_d.csv')
             Utils.save2CSVFile(df, full_path)
         except Exception, e:
