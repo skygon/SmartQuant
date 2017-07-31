@@ -26,7 +26,7 @@ class Box(VolumeBase):
 
         super(Box, self).__init__()
         self.box_len = 180
-        self.partition = 6
+        self.partition = 4
         self.max_shake = 0.5
         self.uniform_shake = 0.05
         self.enter = 0.05
@@ -94,19 +94,45 @@ class Box(VolumeBase):
 
     # dict 排序， 选出value 大于 self.max_high * 0.98的所有day_index, 观察是否均匀分布
     def uniformDistribute_2(self):
-        dh_map = {}
-        for i in range(self.start_day, -self.box_len+self.start_day, -1):
-            dh_map[i] = self.high[i]
-        
-        # tuple_list is list of tuple, item is (day, price)
-        tuple_list = sorted(dh_map.items(), key=lambda x:x[1], reverse=True)
-        high_index = []
-        for i in range(len(tuple_list)):
-            if tuple_list[i][1] >= self.max_high * 0.98:
-                high_index.append(tuple_list[i][0])
+        try:
+            dh_map = {}
+            for i in range(self.start_day, -self.box_len+self.start_day, -1):
+                dh_map[i] = self.high[i]
+            
+            # tuple_list is list of tuple, item is (day, price)
+            tuple_list = sorted(dh_map.items(), key=lambda x:x[1], reverse=True)
+            high_index = []
+            for i in range(len(tuple_list)):
+                if tuple_list[i][1] >= self.max_high * 0.96:
+                    high_index.append(tuple_list[i][0])
+            
+            # uniform distribute of high_index
+            bucket = 3
+            samples = 12
+            if len(high_index) < samples:
+                return False
+            
+            average = samples / bucket
+            step = self.box_len / bucket
+            tops = high_index[0:samples]
+            dist = {}
+            # init dist
+            for i in range(bucket):
+                dist[i] = 0
 
-        # uniform distribute of high_index
-        # TODO
+            for i in range(samples):
+                d = tops[i]
+                index = abs(i - self.start_day) / step
+                dist[index] += 1
+
+            total = 0
+            for i in range(bucket):
+                total += pow((dist[i] - average), 2)
+            
+            print "TOTAL is %s" %(total)
+        except Exception, e:
+            print "uniformDistribute_2 failed %s" %(str(e))
+
 
     def checkCurrentPriceFake(self):
         cp = self.low[self.start_day]
@@ -156,6 +182,8 @@ class Box(VolumeBase):
                 self.exit_uniform_distribute += 1
                 return False
             
+            self.uniformDistribute_2()
+
             if self.test:
                 ret = self.checkCurrentPriceFake()
             else:
@@ -223,7 +251,7 @@ class Test(threading.Thread):
 
 if __name__ == "__main__":
     workers = []
-    for i in range(-60, -65, -1):
+    for i in range(-64, -65, -1):
         t = Test(i)
         workers.append(t)
     
