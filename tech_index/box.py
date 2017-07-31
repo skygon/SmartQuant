@@ -122,14 +122,18 @@ class Box(VolumeBase):
 
             for i in range(samples):
                 d = tops[i]
-                index = abs(i - self.start_day) / step
+                index = abs(d - self.start_day) / step
                 dist[index] += 1
 
             total = 0
             for i in range(bucket):
                 total += pow((dist[i] - average), 2)
             
-            print "TOTAL is %s" %(total)
+            if total <= 20:
+                print "dist: %s, total %s" %(dist, total)
+                return True
+            
+            return False
         except Exception, e:
             print "uniformDistribute_2 failed %s" %(str(e))
 
@@ -177,12 +181,12 @@ class Box(VolumeBase):
                 self.exit_check_price += 1
                 return False
 
-            ret = self.uniformDistribute()
+            ret = self.uniformDistribute_2()
             if ret is False:
                 self.exit_uniform_distribute += 1
                 return False
             
-            self.uniformDistribute_2()
+            #self.uniformDistribute_2()
 
             if self.test:
                 ret = self.checkCurrentPriceFake()
