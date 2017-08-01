@@ -16,7 +16,7 @@ class Box(VolumeBase):
         self.exit_current_price = 0
         self.exit_uniform_distribute = 0
         self.rt = RealtimePrice()
-        self.test = True
+        self.test = False
 
         if self.test:
             self.start_day = start_day
@@ -29,7 +29,7 @@ class Box(VolumeBase):
         self.partition = 4
         self.max_shake = 0.5
         self.uniform_shake = 0.05
-        self.enter = 0.05
+        self.enter = 0.08
         self.getStdDate()
 
 
@@ -129,8 +129,8 @@ class Box(VolumeBase):
             for i in range(bucket):
                 total += pow((dist[i] - average), 2)
             
-            if total <= 20:
-                print "dist: %s, total %s" %(dist, total)
+            if total <= 8:
+                print "[%s] dist: %s, total %s" %(self.code, dist, total)
                 return True
             
             return False
