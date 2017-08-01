@@ -16,7 +16,7 @@ class Box(VolumeBase):
         self.exit_current_price = 0
         self.exit_uniform_distribute = 0
         self.rt = RealtimePrice()
-        self.test = False
+        self.test = True
 
         if self.test:
             self.start_day = start_day
@@ -45,7 +45,7 @@ class Box(VolumeBase):
         return False
 
     
-    def checkPrice(self):
+    def checkShake(self):
         try:
             high = []
             low = []
@@ -69,7 +69,7 @@ class Box(VolumeBase):
 
             return False
         except Exception, e:
-            print "check price failed %s" %(str(e))
+            print "check shake failed %s" %(str(e))
     
     # check if high price exist uniformly
     def uniformDistribute(self):
@@ -107,8 +107,8 @@ class Box(VolumeBase):
                     high_index.append(tuple_list[i][0])
             
             # uniform distribute of high_index
-            bucket = 3
-            samples = 12
+            bucket = 4
+            samples = 16
             if len(high_index) < samples:
                 return False
             
@@ -141,6 +141,9 @@ class Box(VolumeBase):
     def checkCurrentPriceFake(self):
         cp = self.low[self.start_day]
         if (cp - self.min_low) / self.min_low < self.enter:
+            for i in range(2):
+                if self.close[self.start_day-i] < self.close[self.start_day-i-1]:
+                    return False
             print "high : %s, low : %s, current: %s" %(self.max_high, self.min_low, cp)
             return True
             
@@ -156,6 +159,10 @@ class Box(VolumeBase):
             self.rt.setCode(c)
             cp = self.rt.getCurrentPrice()
             if (cp - self.min_low) / self.min_low < self.enter:
+                for i in range(2):
+                    if self.close[self.start_day-i] < self.close[self.start_day-i-1]:
+                        return False
+
                 print "high : %s, low : %s, current: %s" %(self.max_high, self.min_low, cp)
                 return True
             
@@ -176,7 +183,7 @@ class Box(VolumeBase):
             if self.isStartUp():
                 return False
 
-            ret = self.checkPrice()
+            ret = self.checkShake()
             if ret is False:
                 self.exit_check_price += 1
                 return False
@@ -233,6 +240,23 @@ class Test(threading.Thread):
         
         return c
 
+    def singleThread(self):
+        full_queue = g_utils.getFullQueIns()
+        while True:
+            try:
+                code = full_queue.get(False)
+                code = self.handleNumericCode(code)
+
+                self.processOneCode(code)
+            except Queue.Empty:
+                print "All works of single index have been done \n"
+                break
+            except Exception, e:
+                print "single index Error : %s \n" %(str(e))
+        
+        if self.count >= 3:
+            print "=== try day: %s ===" %(self.start_day)
+    
     def run(self):
         full_queue = g_utils.getFullQueIns()
         while True:
@@ -254,12 +278,12 @@ class Test(threading.Thread):
 
 
 if __name__ == "__main__":
-    workers = []
-    for i in range(-64, -65, -1):
+    #workers = []
+    for i in range(-60, -100, -5):
         t = Test(i)
-        workers.append(t)
+        t.singleThread()
     
-    for t in workers:
-        if t.isAlive():
-            t.join()
+    #for t in workers:
+    #    if t.isAlive():
+    #        t.join()
         

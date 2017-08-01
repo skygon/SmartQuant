@@ -48,7 +48,7 @@ class SingleIndex(threading.Thread):
     def processOneCode(self, code):
         self.index_obj.setCode(code)
         if self.index_obj.canBuy():
-            print "[%s]" %(code)
+            print "*** [%s] ***" %(code)
     
     def handleNumericCode(slef, code):
         c = str(code)
