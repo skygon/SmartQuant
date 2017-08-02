@@ -93,6 +93,8 @@ class Box(VolumeBase):
             print "uniformDistribute failed %s" %(str(e))
 
     # dict 排序， 选出value 大于 self.max_high * 0.98的所有day_index, 观察是否均匀分布
+    # 3 / 12 -> 8
+    # 6 / 24 ->
     def uniformDistribute_2(self):
         try:
             dh_map = {}
@@ -107,8 +109,8 @@ class Box(VolumeBase):
                     high_index.append(tuple_list[i][0])
             
             # uniform distribute of high_index
-            bucket = 4
-            samples = 16
+            bucket = 6
+            samples = 24
             if len(high_index) < samples:
                 return False
             
@@ -128,7 +130,7 @@ class Box(VolumeBase):
             total = 0
             for i in range(bucket):
                 total += pow((dist[i] - average), 2)
-            
+            print "[%s] dist: %s, total %s" %(self.code, dist, total)
             if total <= 8:
                 print "[%s] dist: %s, total %s" %(self.code, dist, total)
                 return True
@@ -188,12 +190,12 @@ class Box(VolumeBase):
                 self.exit_check_price += 1
                 return False
 
-            ret = self.uniformDistribute_2()
+            ret = self.uniformDistribute()
             if ret is False:
                 self.exit_uniform_distribute += 1
                 return False
             
-            #self.uniformDistribute_2()
+            self.uniformDistribute_2()
 
             if self.test:
                 ret = self.checkCurrentPriceFake()
