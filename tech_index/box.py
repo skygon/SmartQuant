@@ -25,10 +25,12 @@ class Box(VolumeBase):
             self.start_day = -1  # we can set this to early days for test
 
         super(Box, self).__init__()
-        self.box_len = 180
+        self.box_len = 240
         self.partition = 4
         self.max_shake = 0.5
         self.uniform_shake = 0.05
+        self.uniform_2_enter = 0.96
+        self.uniform_2_thre = 128
         self.enter = 0.08
         self.getStdDate()
 
@@ -105,7 +107,7 @@ class Box(VolumeBase):
             tuple_list = sorted(dh_map.items(), key=lambda x:x[1], reverse=True)
             high_index = []
             for i in range(len(tuple_list)):
-                if tuple_list[i][1] >= self.max_high * 0.96:
+                if tuple_list[i][1] >= self.max_high * self.uniform_2_enter:
                     high_index.append(tuple_list[i][0])
             
             # uniform distribute of high_index
@@ -130,9 +132,9 @@ class Box(VolumeBase):
             total = 0
             for i in range(bucket):
                 total += pow((dist[i] - average), 2)
-            print "[%s] dist: %s, total %s" %(self.code, dist, total)
-            if total <= 8:
-                print "[%s] dist: %s, total %s" %(self.code, dist, total)
+            #print "[%s] dist: %s, total %s" %(self.code, dist, total)
+            if total <= self.uniform_2_thre:
+                print "PASS: [%s], MAX %s, LOW: %s, dist: %s, total %s" %(self.code, self.max_high, self.min_low, dist, total)
                 return True
             
             return False
@@ -190,12 +192,12 @@ class Box(VolumeBase):
                 self.exit_check_price += 1
                 return False
 
-            ret = self.uniformDistribute()
+            ret = self.uniformDistribute_2()
             if ret is False:
                 self.exit_uniform_distribute += 1
                 return False
             
-            self.uniformDistribute_2()
+            #self.uniformDistribute_2()
 
             if self.test:
                 ret = self.checkCurrentPriceFake()
