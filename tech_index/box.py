@@ -30,7 +30,7 @@ class Box(VolumeBase):
         self.max_shake = 0.5
         self.uniform_shake = 0.05
         self.uniform_2_enter = 0.96
-        self.uniform_2_thre = 128
+        self.uniform_2_thre = 164
         self.enter = 0.08
         self.getStdDate()
 
@@ -230,7 +230,7 @@ class Test(threading.Thread):
         self.index_obj = Box(start_day)
         self.count = 0
         print self.index_obj.current_date
-        self.start()
+        #self.start()
 
     def processOneCode(self, code):
         self.index_obj.setCode(code)
@@ -258,7 +258,7 @@ class Test(threading.Thread):
             except Exception, e:
                 print "single index Error : %s \n" %(str(e))
         
-        if self.count >= 3:
+        if self.count >= 1:
             print "=== try day: %s ===" %(self.start_day)
     
     def run(self):
