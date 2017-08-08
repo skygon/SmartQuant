@@ -31,7 +31,7 @@ class Box(VolumeBase):
         self.uniform_shake = 0.05
         self.uniform_2_enter = 0.96
         self.uniform_2_thre = 164
-        self.enter = 0.08
+        self.enter = 0.1
         self.getStdDate()
 
 
@@ -111,7 +111,7 @@ class Box(VolumeBase):
                     high_index.append(tuple_list[i][0])
             
             # uniform distribute of high_index
-            bucket = 6
+            bucket = 4
             samples = 24
             if len(high_index) < samples:
                 return False
@@ -134,8 +134,9 @@ class Box(VolumeBase):
                 total += pow((dist[i] - average), 2)
             #print "[%s] dist: %s, total %s" %(self.code, dist, total)
             if total <= self.uniform_2_thre:
-                print "PASS: [%s], MAX %s, LOW: %s, dist: %s, total %s" %(self.code, self.max_high, self.min_low, dist, total)
-                return True
+                if dist[0] > 1:
+                    print "PASS: [%s], MAX %s, LOW: %s, dist: %s, total %s" %(self.code, self.max_high, self.min_low, dist, total)
+                    return True
             
             return False
         except Exception, e:
