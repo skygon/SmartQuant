@@ -26,12 +26,25 @@ class Pusher(threading.Thread):
             msg = "[HIGH] " + code + "--> " + str(price)
         
         return msg
+    
+    #crash:code
+    def handleCrashMsg(self):
+        try:
+            code = self.data[1]
+            msg = "CRASH --> [%s]" %(code)
+            return msg
+        except Exception, e:
+            msg = "handleCrashMsg failed"
+            return msg
+        
 
     def parseMessage(self, data):
         self.data = data.split(':')
         msg = None
         if self.data[0] == 'price':
             msg = self.handlePriceMsg()
+        if self.data[0] == 'crash':
+            msg = self.handleCrashMsg()
         
         return msg
 
@@ -45,6 +58,7 @@ class Pusher(threading.Thread):
                 
                 if msg is not None:
                     print "******* send to client *******"
+                    print msg
                     #msg = "@skygon " + msg
                     itchat.send_msg(msg, CLIENT_NAME)
             except Exception, e:

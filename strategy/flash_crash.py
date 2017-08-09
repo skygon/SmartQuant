@@ -20,15 +20,24 @@ INDEX_URL = "http://hq.sinajs.cn/list="
 class Watcher(threading.Thread):
     def __init__(self):
         super(Watcher, self).__init__()
-        self.base_len = 10
+        self.base_len = 0
+        self.sleep = 2 # 2 seconds
+        self.flash_time = 180 # flash crash must happen in 180 seconds
+        self.total_ticks = 0
+        self.init_ticks = self.flash_time / self.sleep
         self.initCodeBase()
         print "I have code base %s" %(self.code)
         self.prepareURL()
+        self.start()
 
     def initCodeBase(self):
         try:
             self.code = []
-            for i in range(self.base_len):
+            self.conf = {}
+            while True:
+                if self.base_len >= 10:
+                    break
+                
                 c = g_utils.full_queue.get(False)
                 if c.find("300") == 0:
                     continue
@@ -36,7 +45,9 @@ class Watcher(threading.Thread):
                     c = "sh" + c
                 else:
                     c = "sz" + c
+                self.conf[c] = []
                 self.code.append(c)
+                self.base_len += 1
         except Queue.Empty:
             return
         except Exception, e:
@@ -52,9 +63,22 @@ class Watcher(threading.Thread):
                 a = line.split(',')
                 a0 = a[0].split('=')[0]
                 code = a0[-6:]
-                settlement = a[2]
-                current = a[3]
-                print "code[%s], close[%s], now[%s]" %(code, settlement, current)
+                settlement = float(a[2])
+                current = float(a[3])
+                #print "code[%s], close[%s], now[%s]" %(code, settlement, current)
+                if self.total_ticks < 90:
+                    self.conf[code].append(current)
+                    continue
+                if current / settlement <= 0.95:
+                    index = self.total_ticks % self.init_ticks
+                    p = self.conf[code][index]
+                    if current / p <= 0.96:
+                        msg = "crash:[%s]" %(code)
+                        g_utils.msg_queue.put(msg)
+                        # replace the init price
+                        self.conf[code][index] = current
+
+            self.total_ticks += 1
         except Exception, e:
             print "parseLine failed %s" %(str(e))
 
@@ -65,12 +89,23 @@ class Watcher(threading.Thread):
                 # last line is empty line
                 alllines = r.text.encode("utf-8").split(';')[:-1]
                 self.parseLine(alllines)
-                time.sleep(2)
+                time.sleep(self.sleep)
             except Exception, e:
                 print "Watcher error: %s" %(str(e))
 
 
+def start_monitor():
+    p = Pusher({})
+    p.start()
+
+    watchers = []
+    for i in range(300):
+        w = Watcher()
+        watchers.append(w)
+    
+    for t in watchers:
+        if t.isAlive():
+            t.join()
+
 if __name__ == "__main__":
-    w = Watcher()
-    w.start()
-    w.join()
+    start_monitor()
