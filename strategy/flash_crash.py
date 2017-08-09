@@ -15,17 +15,19 @@ from box import Box
 from message_pusher import Pusher
 from utils import *
 
-INDEX_URL = "http://hq.sinajs.cn/list="
+SINA_INDEX_URL = "http://hq.sinajs.cn/list="
+TX_INDEX_URL = "http://qt.gtimg.cn/q="
 
 class Watcher(threading.Thread):
     def __init__(self):
         super(Watcher, self).__init__()
+        self.url_type = 'sina'
         self.base_len = 0
         self.enter_max = 1.02
         self.enter_min = 0.98
         self.confirm = 0.97
         self.sleep = 1 # sleep seconds
-        self.flash_time = 30 # flash crash must happen in xxx seconds
+        self.flash_time = 5 # flash crash must happen in xxx seconds
         self.total_ticks = 0
         self.init_ticks = self.flash_time / self.sleep
         self.initCodeBase()
@@ -60,16 +62,29 @@ class Watcher(threading.Thread):
         
     def prepareURL(self):
         codes = ','.join(self.code)
-        self.url = INDEX_URL + codes
+        if self.url_type == 'sina':
+            self.url = SINA_INDEX_URL + codes
+        elif self.url_type == 'tx':
+            self.url = TX_INDEX_URL + codes
+
+    def parseLineSina(self, line):
+        a = line.split(',')
+        a0 = a[0].split('=')[0]
+        code = a0[-8:] #shxxxxxx or szxxxxxx
+        settlement = float(a[2])
+        current = float(a[3])
+        return code, settlement, current
+
+    def parseLineTx(self, line):
 
     def parseLine(self, alllines):
         try:
             for line in alllines:
-                a = line.split(',')
-                a0 = a[0].split('=')[0]
-                code = a0[-8:] #shxxxxxx or szxxxxxx
-                settlement = float(a[2])
-                current = float(a[3])
+                if self.url_type == 'sina':
+                    code, settlement, current = self.parseLineSina(line)
+                elif self.url_type == 'tx':
+                    code, settlement, current = self.parseLineTx(line)
+                
                 #print "code[%s], close[%s], now[%s]" %(code, settlement, current)
                 if self.total_ticks < self.init_ticks:
                     self.conf[code].append(current)
@@ -93,9 +108,10 @@ class Watcher(threading.Thread):
 
     def run(self):
         start = time.time()
+        s = requests.Session()
         while True:
             try:
-                r = requests.get(self.url)
+                r = s.get(self.url)
                 # last line is empty line
                 alllines = r.text.encode("utf-8").split(';')[:-1]
                 self.parseLine(alllines)
@@ -110,6 +126,7 @@ class Watcher(threading.Thread):
             except Exception, e:
                 print "Watcher error: %s" %(str(e))
                 time.sleep(2)
+                s = requests.Session()
 
 
 def start_monitor():
