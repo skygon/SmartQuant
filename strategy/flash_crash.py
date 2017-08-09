@@ -108,4 +108,6 @@ def start_monitor():
             t.join()
 
 if __name__ == "__main__":
-    start_monitor()
+    #start_monitor()
+    w = Watcher()
+    w.join()
