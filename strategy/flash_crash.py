@@ -24,8 +24,8 @@ class Watcher(threading.Thread):
         self.enter_max = 1.02
         self.enter_min = 0.98
         self.confirm = 0.97
-        self.sleep = 2 # 2 seconds
-        self.flash_time = 180 # flash crash must happen in 180 seconds
+        self.sleep = 1 # sleep seconds
+        self.flash_time = 30 # flash crash must happen in xxx seconds
         self.total_ticks = 0
         self.init_ticks = self.flash_time / self.sleep
         self.initCodeBase()
@@ -92,6 +92,7 @@ class Watcher(threading.Thread):
             print "parseLine failed %s" %(str(e))
 
     def run(self):
+        start = time.time()
         while True:
             try:
                 r = requests.get(self.url)
@@ -99,11 +100,16 @@ class Watcher(threading.Thread):
                 alllines = r.text.encode("utf-8").split(';')[:-1]
                 self.parseLine(alllines)
                 time.sleep(self.sleep)
+                #print "one round cost %s seconds" %(end-start)
+                #print "total ticks %s" %(self.total_ticks)
                 if self.total_ticks >= self.init_ticks and self.indicate:
                     print "Have enough ticks. Start to watch the crash..."
+                    end = time.time()
                     self.indicate = False
+                    print "Collect init ticks cost %s seconds" %(end-start)
             except Exception, e:
                 print "Watcher error: %s" %(str(e))
+                time.sleep(2)
 
 
 def start_monitor():
