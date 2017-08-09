@@ -52,6 +52,9 @@ class Utils(object):
         df = DataFrame.from_csv(full_path)
         codes = df.code.values
         for c in codes:
+            c = str(c)
+            if len(c) < 6:
+                c = "0" * (6 - len(c)) + c
             que.put(c)
         
         return que
@@ -62,6 +65,9 @@ class Utils(object):
         df = DataFrame.from_csv(full_path)
         codes = df.code.values
         for c in codes:
+            c = str(c)
+            if len(c) < 6:
+                c = "0" * (6 - len(c)) + c
             que.put(c)
         
         return que
@@ -72,6 +78,9 @@ class Utils(object):
         df = DataFrame.from_csv(full_path)
         codes = df.code.values
         for c in codes:
+            c = str(c)
+            if len(c) < 6:
+                c = "0" * (6 - len(c)) + c
             que.put(c)
         
         return que
@@ -82,6 +91,9 @@ class Utils(object):
         df = DataFrame.from_csv(full_path)
         codes = df.code.values
         for c in codes:
+            c = str(c)
+            if len(c) < 6:
+                c = "0" * (6 - len(c)) + c
             que.put(c)
         
         return que
@@ -91,8 +103,11 @@ class Utils(object):
         que2 = Utils.getZZ500Queue()
         while True:
             try:
-                code = que2.get(False)
-                que1.put(code)
+                c = que2.get(False)
+                c = str(c)
+                if len(c) < 6:
+                 c = "0" * (6 - len(c)) + c
+                que1.put(c)
             except Queue.Empty:
                 break
         
@@ -118,6 +133,9 @@ class Utils(object):
         df = DataFrame.from_csv(full_path)
         codes = df.code.values
         for c in codes:
+            c = str(c)
+            if len(c) < 6:
+                c = "0" * (6 - len(c)) + c
             que.put(c)
         
         return que
@@ -128,8 +146,11 @@ class Utils(object):
         que2 = Utils.getZZ500Queue()
         while True:
             try:
-                code = que2.get(False)
-                que1.put(code)
+                c = que2.get(False)
+                c = str(c)
+                if len(c) < 6:
+                    c = "0" * (6 - len(c)) + c
+                que1.put(c)
             except Queue.Empty:
                 break
         
