@@ -66,6 +66,7 @@ class Watcher(threading.Thread):
             self.url = SINA_INDEX_URL + codes
         elif self.url_type == 'tx':
             self.url = TX_INDEX_URL + codes
+        print "index url is %s" %(self.url)
 
     def parseLineSina(self, line):
         a = line.split(',')
@@ -76,6 +77,15 @@ class Watcher(threading.Thread):
         return code, settlement, current
 
     def parseLineTx(self, line):
+        a = line.split('~')
+        code = a[2]
+        if code.find("60") == 0:
+            code = "sh" + code
+        else:
+            code = "sz" + code
+        current = a[3]
+        settlement = a[4]
+        return code, settlement, current
 
     def parseLine(self, alllines):
         try:
@@ -84,7 +94,7 @@ class Watcher(threading.Thread):
                     code, settlement, current = self.parseLineSina(line)
                 elif self.url_type == 'tx':
                     code, settlement, current = self.parseLineTx(line)
-                
+                print "code: %s, settlement: %s, current: %s" %(code, settlement, current)
                 #print "code[%s], close[%s], now[%s]" %(code, settlement, current)
                 if self.total_ticks < self.init_ticks:
                     self.conf[code].append(current)
@@ -101,7 +111,7 @@ class Watcher(threading.Thread):
                         g_utils.msg_queue.put(msg)
                         # replace the init price
                         self.conf[code][index] = current
-
+            print "-------------------------------------------"
             self.total_ticks += 1
         except Exception, e:
             print "parseLine failed %s" %(str(e))
@@ -116,10 +126,8 @@ class Watcher(threading.Thread):
                 alllines = r.text.encode("utf-8").split(';')[:-1]
                 self.parseLine(alllines)
                 time.sleep(self.sleep)
-                #print "one round cost %s seconds" %(end-start)
-                #print "total ticks %s" %(self.total_ticks)
+
                 if self.total_ticks >= self.init_ticks and self.indicate:
-                    print "Have enough ticks. Start to watch the crash..."
                     end = time.time()
                     self.indicate = False
                     print "Collect init ticks cost %s seconds" %(end-start)
@@ -143,8 +151,8 @@ def start_monitor():
             t.join()
 
 if __name__ == "__main__":
-    start_monitor()
+    #start_monitor()
     #p = Pusher({})
     #p.start()
-    #w = Watcher()
-    #w.join()
+    w = Watcher()
+    w.join()
