@@ -22,13 +22,14 @@ class Watcher(threading.Thread):
         super(Watcher, self).__init__()
         self.base_len = 0
         self.sleep = 2 # 2 seconds
-        self.flash_time = 180 # flash crash must happen in 180 seconds
+        self.flash_time = 10 # flash crash must happen in 180 seconds
         self.total_ticks = 0
         self.init_ticks = self.flash_time / self.sleep
         self.initCodeBase()
         print "I have code base %s" %(self.code)
-        self.prepareURL()
-        self.start()
+        if len(self.base_len) > 0:
+            self.prepareURL()
+            self.start()
 
     def initCodeBase(self):
         try:
@@ -62,18 +63,19 @@ class Watcher(threading.Thread):
             for line in alllines:
                 a = line.split(',')
                 a0 = a[0].split('=')[0]
-                code = a0[-6:]
+                code = a0[-8:] #shxxxxxx or szxxxxxx
                 settlement = float(a[2])
                 current = float(a[3])
                 #print "code[%s], close[%s], now[%s]" %(code, settlement, current)
-                if self.total_ticks < 90:
+                if self.total_ticks < self.init_ticks:
                     self.conf[code].append(current)
                     continue
-                if current / settlement <= 0.95:
+                print "Have enough ticks. current is %s, settlement is %s" %(current, settlement)
+                if current / settlement <= 1.5:
                     index = self.total_ticks % self.init_ticks
                     p = self.conf[code][index]
-                    if current / p <= 0.96:
-                        msg = "crash:[%s]" %(code)
+                    if current / p <= 1.2:
+                        msg = "crash:%s" %(code)
                         g_utils.msg_queue.put(msg)
                         # replace the init price
                         self.conf[code][index] = current
@@ -99,7 +101,7 @@ def start_monitor():
     p.start()
 
     watchers = []
-    for i in range(300):
+    for i in range(200):
         w = Watcher()
         watchers.append(w)
     
@@ -108,6 +110,8 @@ def start_monitor():
             t.join()
 
 if __name__ == "__main__":
-    #start_monitor()
-    w = Watcher()
-    w.join()
+    start_monitor()
+    #p = Pusher({})
+    #p.start()
+    #w = Watcher()
+    #w.join()
