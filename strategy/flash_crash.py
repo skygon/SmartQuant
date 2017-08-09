@@ -21,13 +21,15 @@ class Watcher(threading.Thread):
     def __init__(self):
         super(Watcher, self).__init__()
         self.base_len = 0
+        self.enter = 0.95
+        self.confirm = 0.96
         self.sleep = 2 # 2 seconds
-        self.flash_time = 10 # flash crash must happen in 180 seconds
+        self.flash_time = 180 # flash crash must happen in 180 seconds
         self.total_ticks = 0
         self.init_ticks = self.flash_time / self.sleep
         self.initCodeBase()
         print "I have code base %s" %(self.code)
-        if len(self.base_len) > 0:
+        if self.base_len > 0:
             self.prepareURL()
             self.start()
 
@@ -70,11 +72,11 @@ class Watcher(threading.Thread):
                 if self.total_ticks < self.init_ticks:
                     self.conf[code].append(current)
                     continue
-                print "Have enough ticks. current is %s, settlement is %s" %(current, settlement)
-                if current / settlement <= 1.5:
+                
+                if current / settlement <= self.enter:
                     index = self.total_ticks % self.init_ticks
                     p = self.conf[code][index]
-                    if current / p <= 1.2:
+                    if current / p <= self.confirm:
                         msg = "crash:%s" %(code)
                         g_utils.msg_queue.put(msg)
                         # replace the init price
