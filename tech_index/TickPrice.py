@@ -52,9 +52,23 @@ class TickPrice(VolumeBase):
         file_name = self.code + ".csv"
         f = os.path.join(self.tick_data_path, file_name)
         df = DataFrame.from_csv(f)
+        
         self.df = df[df.date.str.contains(self.current_date)]
+        self.high = self.df.high.values
+        self.low = self.df.low.values
+        self.tick = self.df.date.values
 
-    
+    def findCrash(self):
+        for i in range(len(self.tick)):
+            h = self.high[i]
+            l = self.low[i]
+            if h == 0:
+                return
+            if l / h <= 0.95:
+                print "**** code[%s] crash at %s ****" %(self.code, self.date[i])
+                return
+
+        
     def getSummary(self):
         self.date = self.df.date.values
         self.open = self.df.open.values
@@ -74,9 +88,9 @@ class TickPrice(VolumeBase):
                 self.up['price'] += (self.close[i] - self.open[i])
                 self.up['volume'] += self.volume[i]
 
-        # print "===== total[%s] / up[%s] / down[%s] =====" %(self.length, self.up['count'], self.down['count'])
-        # print "===== Price change: total[%s] / up[%s] / down[%s] =====" %((self.close[self.length-1] - self.open[0]), self.up['price'], self.down['price'])
-        # print "===== up volume : %s ======== down volume :: %s" %(self.up['volume'], self.down['volume'])
+        print "===== total[%s] / up[%s] / down[%s] =====" %(self.length, self.up['count'], self.down['count'])
+        print "===== Price change: total[%s] / up[%s] / down[%s] =====" %((self.close[self.length-1] - self.open[0]), self.up['price'], self.down['price'])
+        print "===== up volume : %s ======== down volume :: %s" %(self.up['volume'], self.down['volume'])
 
 
     def simple_1(self):
@@ -124,10 +138,25 @@ class TickPrice(VolumeBase):
         print "==== accept because no down count: %s" %(self.accept_no_down_count)
         print "==== stock pool : %s" %(self.stock_pool)
 
+
+def monitor():
+    t = TickPrice('2017-08-09')
+    while True:
+        try:
+            c = g_utils.full_queue.get(False)
+            t.setCode(c)
+            t.prepareDataFromDisk()
+            t.findCrash()
+        except Queue.Empty:
+            break
+        except Exception,e:
+            print "monitor error %s" %(str(e))
+
 if __name__ == "__main__":
-    t = TickPrice('2017-07-19')
-    t.setCode('603993')
-    t.prepareDataFromDisk()
-    print t.df
-    t.getSummary()
+    monitor()
+    # t = TickPrice('2017-08-09')
+    # t.setCode('603993')
+    # t.prepareDataFromDisk()
+    # print t.df
+    # t.getSummary()
     
