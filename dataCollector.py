@@ -123,5 +123,5 @@ def updateTodayRealTime(date_str):
 
 
 if __name__ == "__main__":
-    fetchData('tick_data')
-    #updateTodayRealTime('2017-08-09')
+    #fetchData('tick_data')
+    updateTodayRealTime('2017-08-10')
