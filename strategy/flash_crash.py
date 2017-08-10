@@ -32,11 +32,12 @@ class Watcher(threading.Thread):
         self.enter_min = 0.98
         self.confirm = 0.97
         self.sleep = 1 # sleep seconds
-        self.flash_time = 5 # flash crash must happen in xxx seconds. Best prictise: 4 mins
+        self.flash_time = 210 # flash crash must happen in xxx seconds. Best prictise: 4 mins
         self.total_ticks = 0
-        self.init_ticks = self.flash_time / self.sleep
+        self.init_ticks = self.flash_time / (self.sleep * 2)
         self.initCodeBase()
         self.indicate = True
+        self.show = 0
         print "I have code base %s" %(self.code)
         if self.base_len > 0:
             self.prepareURL()
@@ -77,7 +78,7 @@ class Watcher(threading.Thread):
         a = line.split(',')
         a0 = a[0].split('=')[0]
         code = a0[-8:] #shxxxxxx or szxxxxxx
-        op = a[1]
+        op = float(a[1])
         settlement = float(a[2])
         current = float(a[3])
         return code, settlement, current, op
@@ -89,9 +90,9 @@ class Watcher(threading.Thread):
             code = "sh" + code
         else:
             code = "sz" + code
-        current = a[3]
-        settlement = a[4]
-        op = a[5]
+        current = float(a[3])
+        settlement = float(a[4])
+        op = float(a[5])
         return code, settlement, current, op
 
     def parseLine(self, alllines):
@@ -101,7 +102,7 @@ class Watcher(threading.Thread):
                     code, settlement, current, op = self.parseLineSina(line)
                 elif self.url_type == 'tx':
                     code, settlement, current, op = self.parseLineTx(line)
-                print "code: %s, settlement: %s, current: %s" %(code, settlement, current)
+                #print "code: %s, settlement: %s, current: %s" %(code, settlement, current)
                 #print "code[%s], close[%s], now[%s]" %(code, settlement, current)
                 if self.total_ticks < self.init_ticks:
                     self.conf[code].append(current)
@@ -118,7 +119,10 @@ class Watcher(threading.Thread):
                     g_utils.msg_queue.put(msg)
                     # replace the init price
                     self.conf[code][index] = current
-            print "-------------------------------------------"
+            # self.show += 1
+            # if self.show >= 10:
+            #     self.show = 0
+            #     print "-------------------------------------------"
             self.total_ticks += 1
         except Exception, e:
             print "parseLine failed %s" %(str(e))
@@ -134,10 +138,11 @@ class Watcher(threading.Thread):
                 self.parseLine(alllines)
                 time.sleep(self.sleep)
 
-                if self.total_ticks >= self.init_ticks and self.indicate:
-                    end = time.time()
+                end = time.time()
+                if (self.total_ticks >= self.init_ticks or (int)(end - start) > self.flash_time) and self.indicate:
                     self.indicate = False
-                    print "Collect init ticks cost %s seconds" %(end-start)
+                    self.init_ticks = self.total_ticks
+                    print "Collect init ticks[%s] cost %s seconds" %(self.total_ticks, (end-start))
             except Exception, e:
                 print "Watcher error: %s" %(str(e))
                 time.sleep(2)
@@ -153,13 +158,13 @@ def start_monitor():
         w = Watcher()
         watchers.append(w)
     
-    for t in watchers:
-        if t.isAlive():
-            t.join()
+    while True:
+        print "=============================================="
+        time.sleep(10)
 
 if __name__ == "__main__":
-    #start_monitor()
-    #p = Pusher({})
-    #p.start()
-    w = Watcher()
-    w.join()
+    start_monitor()
+    p = Pusher({})
+    p.start()
+    #w = Watcher()
+    #w.join()
