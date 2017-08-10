@@ -143,7 +143,7 @@ class TickPrice(VolumeBase):
 
 
 def monitor():
-    t = TickPrice('2017-08-07')
+    t = TickPrice('2017-08-03')
     while True:
         try:
             c = g_utils.full_queue.get(False)

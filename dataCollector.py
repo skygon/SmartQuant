@@ -105,7 +105,7 @@ def updateTodayRealTime(date_str):
             delta_df = DataFrame.from_dict(data)
             delta_df = delta_df[['date', 'open', 'close', 'high', 'low', 'volume', 'code']]
 
-            date_string = last_frame.iloc[0,0] # date is the first cell of on row
+            date_string = last_frame.iloc[0,0] # date is the first cell of one row
             if (date_string == date_str):
                 # update today's data
                 print "Update"

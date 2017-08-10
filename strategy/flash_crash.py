@@ -128,6 +128,11 @@ class Watcher(threading.Thread):
             print "parseLine failed %s" %(str(e))
 
     def run(self):
+        while True:
+            g_utils.msg_queue.put("test:hello")
+            time.sleep(5)
+
+    def run__(self):
         start = time.time()
         s = requests.Session()
         while True:
@@ -163,8 +168,8 @@ def start_monitor():
         time.sleep(10)
 
 if __name__ == "__main__":
-    start_monitor()
+    #start_monitor()
     p = Pusher({})
     p.start()
-    #w = Watcher()
-    #w.join()
+    w = Watcher()
+    w.join()

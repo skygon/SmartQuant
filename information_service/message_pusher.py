@@ -8,7 +8,9 @@ import threading
 import time
 
 # filehelper
-CLIENT_NAME = "filehelper"
+# skygon: @cefaa7f2ca6905f870a3e54147f46f6f
+#CLIENT_NAME = "filehelper"
+CLIENT_NAME = "skygon"
 
 class Pusher(threading.Thread):
     def __init__(self, conf):
@@ -45,12 +47,16 @@ class Pusher(threading.Thread):
             msg = self.handlePriceMsg()
         if self.data[0] == 'crash':
             msg = self.handleCrashMsg()
+        if self.data[0] == 'test':
+            return self.data[1]
         
         return msg
 
     def run(self):
         itchat.auto_login(True)
-        itchat.send_msg("hello world", CLIENT_NAME)
+        author = itchat.search_friends(nickName='skygon')[0]
+        author.send('greeting !')
+        #itchat.send_msg("hello world", CLIENT_NAME)
         while True:
             try:
                 item = g_utils.msg_queue.get()
@@ -60,6 +66,7 @@ class Pusher(threading.Thread):
                     print "******* send to client *******"
                     print msg
                     #msg = "@skygon " + msg
-                    itchat.send_msg(msg, CLIENT_NAME)
+                    #itchat.send_msg(msg, CLIENT_NAME)
+                    author.send_msg(msg)
             except Exception, e:
                 print "Pusher failed [%s]" %(str(e))
