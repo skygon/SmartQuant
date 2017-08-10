@@ -5,6 +5,7 @@ import threading
 import Queue
 import requests
 import time
+from pandas import DataFrame
 sys.path.append(os.getcwd())
 sys.path.append(os.path.join(os.getcwd(), 'tech_index'))
 sys.path.append(os.path.join(os.getcwd(), 'information_service'))
@@ -22,6 +23,7 @@ TX_INDEX_URL = "http://qt.gtimg.cn/q="
 # TODO
 # 比较两个源的刷新频率
 # 如果6秒刷新一次，那么请求的时间间隔要控制好，太快和太慢都会有问题
+# 排除crash时跌幅太大的股票，比如超过8%，可能会到跌停板
 
 class Watcher(threading.Thread):
     def __init__(self):
@@ -35,14 +37,29 @@ class Watcher(threading.Thread):
         self.flash_time = 210 # flash crash must happen in xxx seconds. Best practice: 3 - 4 mins
         self.total_ticks = 0
         self.init_ticks = self.flash_time / (self.sleep * 2)
-        self.initCodeBase()
+        self.hist_day_path = os.path.join(os.getcwd(), 'hist_data', 'day')
         self.indicate = True
         self.show = 0
+
+        self.initCodeBase()
         print "I have code base %s" %(self.code)
         if self.base_len > 0:
             self.prepareURL()
             self.start()
 
+
+    def prepareData(self, code):
+        file_name = code + '_hist_d.csv'
+        full_path = os.path.join(self.hist_day_path, file_name)
+
+        if os.path.isfile(full_path) is False:
+            df = DataFrame()
+        else:
+            df = DataFrame.from_csv(f)
+
+        self.df = [] if df.empty else df[df.date.str.contains(self.current_date)]
+        self.close = [] if df.empty else self.df.high.values
+    
     def initCodeBase(self):
         try:
             self.code = []
@@ -52,6 +69,11 @@ class Watcher(threading.Thread):
                     break
                 
                 c = g_utils.full_queue.get(False)
+                #check if stock fresh
+                self.prepareData(c)
+                if len(self.close) < 120:
+                    continue
+
                 if c.find("300") == 0:
                     continue
                 if c.find("60") == 0:
@@ -127,12 +149,12 @@ class Watcher(threading.Thread):
         except Exception, e:
             print "parseLine failed %s" %(str(e))
 
-    def run(self):
+    def run__(self):
         while True:
             g_utils.msg_queue.put("test:hello")
             time.sleep(5)
 
-    def run__(self):
+    def run(self):
         start = time.time()
         s = requests.Session()
         while True:

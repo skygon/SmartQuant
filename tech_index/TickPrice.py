@@ -51,7 +51,10 @@ class TickPrice(VolumeBase):
     def prepareDataFromDisk(self):
         file_name = self.code + ".csv"
         f = os.path.join(self.tick_data_path, file_name)
-        df = DataFrame.from_csv(f)
+        if os.path.isfile(f) is False:
+            df = DataFrame()
+        else:
+            df = DataFrame.from_csv(f)
         self.df = [] if df.empty else df[df.date.str.contains(self.current_date)]
         self.high = [] if df.empty else self.df.high.values
         self.low = [] if df.empty else self.df.low.values
@@ -67,8 +70,8 @@ class TickPrice(VolumeBase):
             c = self.close[i]
             if h == 0:
                 return
-            if l / h <= 0.95 and o >= c:
-                print "**** code[%s] crash at %s ****" %(self.code, self.tick[i])
+            if l / h <= 0.96 and o >= c:
+                print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
                 return
 
         
@@ -143,7 +146,7 @@ class TickPrice(VolumeBase):
 
 
 def monitor():
-    t = TickPrice('2017-08-03')
+    t = TickPrice('2017-08-02')
     while True:
         try:
             c = g_utils.full_queue.get(False)
