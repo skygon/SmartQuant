@@ -32,7 +32,7 @@ class Watcher(threading.Thread):
         self.enter_min = 0.98
         self.confirm = 0.97
         self.sleep = 1 # sleep seconds
-        self.flash_time = 210 # flash crash must happen in xxx seconds. Best prictise: 4 mins
+        self.flash_time = 210 # flash crash must happen in xxx seconds. Best practice: 3 - 4 mins
         self.total_ticks = 0
         self.init_ticks = self.flash_time / (self.sleep * 2)
         self.initCodeBase()
