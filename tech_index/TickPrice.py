@@ -52,20 +52,23 @@ class TickPrice(VolumeBase):
         file_name = self.code + ".csv"
         f = os.path.join(self.tick_data_path, file_name)
         df = DataFrame.from_csv(f)
-        
-        self.df = df[df.date.str.contains(self.current_date)]
-        self.high = self.df.high.values
-        self.low = self.df.low.values
-        self.tick = self.df.date.values
+        self.df = [] if df.empty else df[df.date.str.contains(self.current_date)]
+        self.high = [] if df.empty else self.df.high.values
+        self.low = [] if df.empty else self.df.low.values
+        self.open = [] if df.empty else self.df.open.values
+        self.close = [] if df.empty else self.df.close.values
+        self.tick = [] if df.empty else self.df.date.values
 
     def findCrash(self):
         for i in range(len(self.tick)):
             h = self.high[i]
             l = self.low[i]
+            o = self.open[i]
+            c = self.close[i]
             if h == 0:
                 return
-            if l / h <= 0.95:
-                print "**** code[%s] crash at %s ****" %(self.code, self.date[i])
+            if l / h <= 0.95 and o >= c:
+                print "**** code[%s] crash at %s ****" %(self.code, self.tick[i])
                 return
 
         
@@ -140,7 +143,7 @@ class TickPrice(VolumeBase):
 
 
 def monitor():
-    t = TickPrice('2017-08-09')
+    t = TickPrice('2017-08-07')
     while True:
         try:
             c = g_utils.full_queue.get(False)

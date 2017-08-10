@@ -1,3 +1,4 @@
+#encoding=utf-8
 import os
 import sys
 import threading
@@ -18,6 +19,10 @@ from utils import *
 SINA_INDEX_URL = "http://hq.sinajs.cn/list="
 TX_INDEX_URL = "http://qt.gtimg.cn/q="
 
+# TODO
+# 比较两个源的刷新频率
+# 如果6秒刷新一次，那么请求的时间间隔要控制好，太快和太慢都会有问题
+
 class Watcher(threading.Thread):
     def __init__(self):
         super(Watcher, self).__init__()
@@ -27,7 +32,7 @@ class Watcher(threading.Thread):
         self.enter_min = 0.98
         self.confirm = 0.97
         self.sleep = 1 # sleep seconds
-        self.flash_time = 5 # flash crash must happen in xxx seconds
+        self.flash_time = 5 # flash crash must happen in xxx seconds. Best prictise: 4 mins
         self.total_ticks = 0
         self.init_ticks = self.flash_time / self.sleep
         self.initCodeBase()
@@ -72,9 +77,10 @@ class Watcher(threading.Thread):
         a = line.split(',')
         a0 = a[0].split('=')[0]
         code = a0[-8:] #shxxxxxx or szxxxxxx
+        op = a[1]
         settlement = float(a[2])
         current = float(a[3])
-        return code, settlement, current
+        return code, settlement, current, op
 
     def parseLineTx(self, line):
         a = line.split('~')
@@ -85,15 +91,16 @@ class Watcher(threading.Thread):
             code = "sz" + code
         current = a[3]
         settlement = a[4]
-        return code, settlement, current
+        op = a[5]
+        return code, settlement, current, op
 
     def parseLine(self, alllines):
         try:
             for line in alllines:
                 if self.url_type == 'sina':
-                    code, settlement, current = self.parseLineSina(line)
+                    code, settlement, current, op = self.parseLineSina(line)
                 elif self.url_type == 'tx':
-                    code, settlement, current = self.parseLineTx(line)
+                    code, settlement, current, op = self.parseLineTx(line)
                 print "code: %s, settlement: %s, current: %s" %(code, settlement, current)
                 #print "code[%s], close[%s], now[%s]" %(code, settlement, current)
                 if self.total_ticks < self.init_ticks:
@@ -102,15 +109,15 @@ class Watcher(threading.Thread):
                 if settlement == 0 or current == 0:
                     continue
 
-                if current / settlement <= self.enter_max and current / settlement >= self.enter_min:
-                    index = self.total_ticks % self.init_ticks
-                    p = self.conf[code][index]
-                    if current / p <= self.confirm:
-                        msg = "crash:%s" %(code)
-                        print msg
-                        g_utils.msg_queue.put(msg)
-                        # replace the init price
-                        self.conf[code][index] = current
+                #if current / settlement <= self.enter_max and current / settlement >= self.enter_min:
+                index = self.total_ticks % self.init_ticks
+                p = self.conf[code][index]
+                if current / p <= self.confirm:
+                    msg = "crash:%s" %(code)
+                    print msg
+                    g_utils.msg_queue.put(msg)
+                    # replace the init price
+                    self.conf[code][index] = current
             print "-------------------------------------------"
             self.total_ticks += 1
         except Exception, e:
