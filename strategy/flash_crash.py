@@ -24,6 +24,7 @@ TX_INDEX_URL = "http://qt.gtimg.cn/q="
 # 比较两个源的刷新频率
 # 如果6秒刷新一次，那么请求的时间间隔要控制好，太快和太慢都会有问题
 # 排除crash时跌幅太大的股票，比如超过8%，可能会到跌停板
+# 不要重复发送。发送一次后，记录ticks， 到达一定的ticks后才能再次发送
 
 class Watcher(threading.Thread):
     def __init__(self):
@@ -55,10 +56,9 @@ class Watcher(threading.Thread):
         if os.path.isfile(full_path) is False:
             df = DataFrame()
         else:
-            df = DataFrame.from_csv(f)
+            df = DataFrame.from_csv(full_path)
 
-        self.df = [] if df.empty else df[df.date.str.contains(self.current_date)]
-        self.close = [] if df.empty else self.df.high.values
+        self.close = [] if df.empty else df.high.values
     
     def initCodeBase(self):
         try:
@@ -190,8 +190,8 @@ def start_monitor():
         time.sleep(10)
 
 if __name__ == "__main__":
-    #start_monitor()
-    p = Pusher({})
-    p.start()
-    w = Watcher()
-    w.join()
+    start_monitor()
+    # p = Pusher({})
+    # p.start()
+    # w = Watcher()
+    # w.join()
