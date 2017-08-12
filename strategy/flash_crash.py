@@ -80,7 +80,10 @@ class Watcher(threading.Thread):
                     c = "sh" + c
                 else:
                     c = "sz" + c
-                self.conf[c] = []
+                self.conf[c] = {}
+                self.conf[c]['ticks'] = []
+                self.conf[c]['send'] = False
+                self.conf[c]['count'] = 0
                 self.code.append(c)
                 self.base_len += 1
         except Queue.Empty:
@@ -127,24 +130,30 @@ class Watcher(threading.Thread):
                 #print "code: %s, settlement: %s, current: %s" %(code, settlement, current)
                 #print "code[%s], close[%s], now[%s]" %(code, settlement, current)
                 if self.total_ticks < self.init_ticks:
-                    self.conf[code].append(current)
+                    self.conf[code]['ticks'].append(current)
                     continue
                 if settlement == 0 or current == 0:
                     continue
 
                 #if current / settlement <= self.enter_max and current / settlement >= self.enter_min:
                 index = self.total_ticks % self.init_ticks
-                p = self.conf[code][index]
+                p = self.conf[code]['ticks'][index]
                 if current / p <= self.confirm:
-                    msg = "crash:%s" %(code)
-                    print msg
-                    g_utils.msg_queue.put(msg)
-                    # replace the init price
-                    self.conf[code][index] = current
-            # self.show += 1
-            # if self.show >= 10:
-            #     self.show = 0
-            #     print "-------------------------------------------"
+                    if self.conf[code]['send'] is False:
+                        msg = "crash:%s" %(code)
+                        print msg
+                        g_utils.msg_queue.put(msg)
+                        self.conf[code]['send'] = True
+                        self.conf[code]['count'] = 0
+                
+                self.conf[code]['count'] += 1    
+                if self.conf[code]['count'] >= 50:
+                    self.conf[code]['send'] = False
+                    self.conf[code]['count'] = 0
+
+                # replace the init price
+                self.conf[code]['ticks'][index] = current
+            
             self.total_ticks += 1
         except Exception, e:
             print "parseLine failed %s" %(str(e))
@@ -190,8 +199,8 @@ def start_monitor():
         time.sleep(10)
 
 if __name__ == "__main__":
-    start_monitor()
-    # p = Pusher({})
-    # p.start()
-    # w = Watcher()
-    # w.join()
+    #start_monitor()
+     p = Pusher({})
+     p.start()
+     w = Watcher()
+     w.join()
