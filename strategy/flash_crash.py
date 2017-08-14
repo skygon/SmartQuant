@@ -199,8 +199,8 @@ def start_monitor():
         time.sleep(10)
 
 if __name__ == "__main__":
-    #start_monitor()
-     p = Pusher({})
-     p.start()
-     w = Watcher()
-     w.join()
+    start_monitor()
+    #  p = Pusher({})
+    #  p.start()
+    #  w = Watcher()
+    #  w.join()
