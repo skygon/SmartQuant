@@ -3,6 +3,7 @@ import os
 import sys
 import threading
 import json
+import time
 from pandas import DataFrame
 sys.path.append(os.getcwd())
 from ts_wrapper import TsWrapper
@@ -14,6 +15,7 @@ class WatchDog(threading.Thread):
     def __init__(self):
         super(WatchDog, self).__init__()
         self.url_type = 'sina'
+        self.per = {}
         self.code = []
         self.conf_file = os.path.join(os.getcwd(), 'config', 'watchdog.json')
         self.readConfFile()
@@ -25,6 +27,7 @@ class WatchDog(threading.Thread):
         try:
             for k, v in self.conf.items():
                 self.code.append(k)
+                self.per[k] = 1.0
                 #v['bottom'] = v['bottom'] * 0.98
             print self.conf
         except Exception, e:
@@ -40,6 +43,7 @@ class WatchDog(threading.Thread):
     
     def getMsg(self, code, current, per1, per2):
         msg = "monitor:[%s] IN (%s, %s). Price is %s" %(code, per1, per2, current)
+        print msg
         return msg
 
     def parseLineSina(self, line):
@@ -72,16 +76,14 @@ class WatchDog(threading.Thread):
                     code, current, op = self.parseLineTx(line)
                 
                 if current > self.conf[code]['ceilling']:
-                    per = round(self.conf[code]['ceilling'] / self.conf[code]['keep'], 2)
                     self.conf[code]['bottom'] = self.conf[code]['ceilling']
-                    self.conf[code]['ceilling'] = round(self.conf[code]['ceilling'] * (per+0.01) ,2)
-                    msg = self.getMsg(code, current, per, per+0.01)
+                    self.conf[code]['ceilling'] = round(self.conf[code]['ceilling'] * (self.per[code]+0.01) ,2)
+                    msg = self.getMsg(code, current, self.per[code], self.per[code]+0.01)
                     g_utils.msg_queue.put(msg)
                 elif current < self.conf[code]['bottom']:
-                    per = round(self.conf[code]['bottom'] / self.conf[code]['keep'], 2)
                     self.conf[code]['ceilling'] = self.conf[code]['bottom']
-                    self.conf[code]['bottom'] = round(self.conf[code]['bottom'] * (per-0.01) , 2)
-                    msg = self.getMsg(code, current, per, per-0.01)
+                    self.conf[code]['bottom'] = round(self.conf[code]['bottom'] * (self.per[code]-0.01) , 2)
+                    msg = self.getMsg(code, current, self.per[code], self.per[code]-0.01)
                     g_utils.msg_queue.put(msg)
 
         except Exception, e:
@@ -103,4 +105,4 @@ class WatchDog(threading.Thread):
 
 if __name__ == "__main__":
     w = WatchDog()
-    w.readConfFile()
+    w.start()

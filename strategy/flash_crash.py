@@ -12,6 +12,7 @@ sys.path.append(os.path.join(os.getcwd(), 'information_service'))
 
 
 from TickPrice import TickPrice
+from WatchDog import WatchDog
 from shake import Shake
 from box import Box
 from message_pusher import Pusher
@@ -191,10 +192,13 @@ def start_monitor():
     p = Pusher({})
     p.start()
 
-    watchers = []
-    for i in range(200):
-        w = Watcher()
-        watchers.append(w)
+    wd = WatchDog()
+    wd.start()
+
+    #watchers = []
+    #for i in range(200):
+    #    w = Watcher()
+    #    watchers.append(w)
     
     while True:
         print "=============================================="

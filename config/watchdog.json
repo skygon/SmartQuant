@@ -1,16 +1,16 @@
 {
 "sh600569":{
-    "ceilling": 4.9,
+    "ceilling": 4.7,
     "bottom": 4.7,
     "keep": 4.7
 },
 "sh600702":{
-    "ceilling": 33.2,
-    "bottom": 32.5,
-    "keep": 32.5
+    "ceilling": 32.9,
+    "bottom": 32.9,
+    "keep": 32.9
 },
 "sh603089":{
-    "ceilling": 38.3,
+    "ceilling": 37.9,
     "bottom": 37.9,
     "keep": 37.9
 }
