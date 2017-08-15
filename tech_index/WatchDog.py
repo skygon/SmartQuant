@@ -67,13 +67,8 @@ class WatchDog(threading.Thread):
                 elif self.url_type == 'tx':
                     code, current, op = self.parseLineTx(line)
                 
-                if current / self.conf[code]['keep'] <= 0.96:
-                    msg = self.getMsg(code)
-                    g_utils.msg_queue.put(msg)
-                    continue
-                
                 if current < self.conf[code]['bottom']:
-                    
+
         except Exception, e:
             print "parse line failed %s" %(str(e))
     
