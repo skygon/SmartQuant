@@ -136,6 +136,10 @@ class Watcher(threading.Thread):
                 #if current / settlement <= self.enter_max and current / settlement >= self.enter_min:
                 index = self.total_ticks % self.init_ticks
                 p = self.conf[code]['ticks'][index]
+                if p == 0:
+                    print "Get zero from code[%s]. Check this please." %(code)
+                    continue
+                
                 if current / p <= self.confirm:
                     if self.conf[code]['send'] is False:
                         msg = "crash:%s" %(code)

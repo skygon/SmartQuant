@@ -25,7 +25,7 @@ class WatchDog(threading.Thread):
         try:
             for k, v in self.conf.items():
                 self.code.append(k)
-                v['bottom'] = v['bottom'] * 0.98
+                #v['bottom'] = v['bottom'] * 0.98
             print self.conf
         except Exception, e:
             print "readConfFile failed %s" %(str(e))
@@ -38,6 +38,10 @@ class WatchDog(threading.Thread):
             self.url = TX_INDEX_URL + codes
         print "watch dof index url is %s" %(self.url)
     
+    def getMsg(self, code, current, per1, per2):
+        msg = "[%s] IN (%s, %s). Price is %s" %(code, per1, per2, current)
+        return msg
+
     def parseLineSina(self, line):
         a = line.split(',')
         a0 = a[0].split('=')[0]
@@ -67,13 +71,18 @@ class WatchDog(threading.Thread):
                 elif self.url_type == 'tx':
                     code, current, op = self.parseLineTx(line)
                 
-                if current / self.conf[code]['keep'] <= 0.96:
-                    msg = self.getMsg(code)
+                if current > self.conf[code]['ceilling']:
+                    per = round(self.conf[code]['ceilling'] / self.conf[code]['keep'], 2)
+                    self.conf[code]['bottom'] = self.conf[code]['ceilling']
+                    self.conf[code]['ceilling'] = round(self.conf[code]['ceilling'] * (per+0.01) ,2)
+                    msg = self.getMsg(code, current, per, per+0.01)
                     g_utils.msg_queue.put(msg)
-                    continue
-                
-                if current < self.conf[code]['bottom']:
-                    
+                elif current < self.conf[code]['bottom']:
+                    per = round(self.conf[code]['bottom'] / self.conf[code]['keep'], 2)
+                    self.conf[code]['ceilling'] = self.conf[code]['bottom']
+                    self.conf[code]['bottom'] = round(self.conf[code]['bottom'] * (per-0.01) , 2)
+                    msg = self.getMsg(code, current, per, per-0.01)
+                    g_utils.msg_queue.put(msg)
         except Exception, e:
             print "parse line failed %s" %(str(e))
     
