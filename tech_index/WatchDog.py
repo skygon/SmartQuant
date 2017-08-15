@@ -36,10 +36,10 @@ class WatchDog(threading.Thread):
             self.url = SINA_INDEX_URL + codes
         elif self.url_type == 'tx':
             self.url = TX_INDEX_URL + codes
-        print "watch dof index url is %s" %(self.url)
+        print "watch dog index url is %s" %(self.url)
     
     def getMsg(self, code, current, per1, per2):
-        msg = "[%s] IN (%s, %s). Price is %s" %(code, per1, per2, current)
+        msg = "monitor:[%s] IN (%s, %s). Price is %s" %(code, per1, per2, current)
         return msg
 
     def parseLineSina(self, line):

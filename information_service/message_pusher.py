@@ -47,6 +47,8 @@ class Pusher(threading.Thread):
             msg = self.handlePriceMsg()
         if self.data[0] == 'crash':
             msg = self.handleCrashMsg()
+        if self.data[0] == 'monitor':
+            msg = self.data[1]
         if self.data[0] == 'test':
             return self.data[1]
         
