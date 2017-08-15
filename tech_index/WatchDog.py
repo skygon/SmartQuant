@@ -83,6 +83,7 @@ class WatchDog(threading.Thread):
                     self.conf[code]['bottom'] = round(self.conf[code]['bottom'] * (per-0.01) , 2)
                     msg = self.getMsg(code, current, per, per-0.01)
                     g_utils.msg_queue.put(msg)
+
         except Exception, e:
             print "parse line failed %s" %(str(e))
     
