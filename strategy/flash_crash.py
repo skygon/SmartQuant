@@ -17,8 +17,6 @@ from box import Box
 from message_pusher import Pusher
 from utils import *
 
-SINA_INDEX_URL = "http://hq.sinajs.cn/list="
-TX_INDEX_URL = "http://qt.gtimg.cn/q="
 
 # TODO
 # 比较两个源的刷新频率

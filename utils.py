@@ -11,6 +11,9 @@ last_days['two'] = start_day+2
 last_days['three'] = start_day+1
 last_days['four'] = start_day
 
+SINA_INDEX_URL = "http://hq.sinajs.cn/list="
+TX_INDEX_URL = "http://qt.gtimg.cn/q="
+
 turn_on = False
 def debug_logger(msg):
     if turn_on:
