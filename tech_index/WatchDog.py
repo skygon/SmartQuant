@@ -27,7 +27,9 @@ class WatchDog(threading.Thread):
         try:
             for k, v in self.conf.items():
                 self.code.append(k)
-                self.per[k] = 1.0
+                self.per[k] = {}
+                self.per[k]['c'] = 1.0
+                self.per[k]['b'] = 1.0
                 #v['bottom'] = v['bottom'] * 0.98
             print self.conf
         except Exception, e:
@@ -76,15 +78,29 @@ class WatchDog(threading.Thread):
                     code, current, op = self.parseLineTx(line)
                 
                 if current > self.conf[code]['ceilling']:
-                    self.conf[code]['bottom'] = self.conf[code]['ceilling']
-                    self.conf[code]['ceilling'] = round(self.conf[code]['ceilling'] * (self.per[code]+0.01) ,2)
-                    msg = self.getMsg(code, current, self.per[code], self.per[code]+0.01)
+                    # adjust box ceilling and bottom percentage
+                    while self.per[code]['c'] * self.conf[code]['keep'] < current:
+                        self.per[code]['b'] = self.per[code]['c']
+                        self.per[code]['c'] += 0.01
+                    
+                    # adjust box high and low price
+                    self.conf[code]['bottom'] = round(self.conf[code]['keep'] * self.per[code]['b'] ,2)
+                    self.conf[code]['ceilling'] = round(self.conf[code]['keep'] * self.per[code]['c'] ,2)
+
+                    msg = self.getMsg(code, current, self.per[code]['b'], self.per[code]['c'])
                     g_utils.msg_queue.put(msg)
+                    
                 elif current < self.conf[code]['bottom']:
-                    self.conf[code]['ceilling'] = self.conf[code]['bottom']
-                    self.conf[code]['bottom'] = round(self.conf[code]['bottom'] * (self.per[code]-0.01) , 2)
-                    msg = self.getMsg(code, current, self.per[code], self.per[code]-0.01)
+                    while self.per[code]['b'] * self.conf[code]['keep'] > current:
+                        self.per[code]['c'] = self.per[code]['b']
+                        self.per[code]['b'] -= 0.01
+
+                    self.conf[code]['ceilling'] = round(self.conf[code]['keep'] * self.per[code]['c'] , 2)
+                    self.conf[code]['bottom'] = round(self.conf[code]['keep'] * self.per[code]['b'] , 2)
+
+                    msg = self.getMsg(code, current, self.per[code]['b'], self.per[code]['c'])
                     g_utils.msg_queue.put(msg)
+                    
 
         except Exception, e:
             print "parse line failed %s" %(str(e))
