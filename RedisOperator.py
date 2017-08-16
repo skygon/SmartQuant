@@ -26,6 +26,9 @@ class RedisOperator(object):
     
     def hget(self, table, field):
         return self.con.hget(table, field)
+
+    def hdel(self, table, filed):
+        return self.con.hdel(table, filed)
     
     def hlen(self, table):
         return self.con.hlen(table)
@@ -38,6 +41,7 @@ class RedisOperator(object):
     
     def rpush(self, index_list, index):
         return self.con.rpush(index_list, index)
+
     
 
 if __name__ == "__main__":

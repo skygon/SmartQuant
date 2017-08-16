@@ -8,6 +8,7 @@ from pandas import DataFrame
 sys.path.append(os.getcwd())
 from ts_wrapper import TsWrapper
 import  requests
+from RedisOperator import RedisOperator
 from utils import *
 
 
@@ -15,11 +16,14 @@ class WatchDog(threading.Thread):
     def __init__(self):
         super(WatchDog, self).__init__()
         self.url_type = 'sina'
+        self.table = "watch_table"
         self.per = {}
         self.code = []
         self.conf_file = os.path.join(os.getcwd(), 'config', 'watchdog.json')
+        self.redis = RedisOperator("localhost", 6379, 0)
         self.readConfFile()
         self.prepareURL()
+        #self.readConfFromRedis()
 
     def readConfFile(self):
         with open(self.conf_file, 'r') as f:
@@ -30,18 +34,34 @@ class WatchDog(threading.Thread):
                 self.per[k] = {}
                 self.per[k]['c'] = 1.0
                 self.per[k]['b'] = 1.0
+                self.redis.hsetJson(self.table, k, v)
                 #v['bottom'] = v['bottom'] * 0.98
             print self.conf
         except Exception, e:
             print "readConfFile failed %s" %(str(e))
     
+    
+    def readConfFromRedis(self):
+        try:
+            keys = self.redis.hkeys(self.table)
+            self.code = []
+            #print "conf has keys: %s" %(keys)
+            for k in keys:
+                self.code.append(k)
+                strv = self.redis.hget(self.table, k)
+                v = json.loads(strv)
+                self.conf[k] = v
+            #print self.conf
+        except Exception, e:
+            print "read conf from redis failed -> %s" %(str(e))
+
     def prepareURL(self):
         codes = ','.join(self.code)
         if self.url_type == 'sina':
             self.url = SINA_INDEX_URL + codes
         elif self.url_type == 'tx':
             self.url = TX_INDEX_URL + codes
-        print "watch dog index url is %s" %(self.url)
+        #print "watch dog index url is %s" %(self.url)
     
     def getMsg(self, code, current, per1, per2):
         msg = "monitor:[%s] IN (%s, %s). Price is %s" %(code, per1, per2, current)
@@ -70,6 +90,7 @@ class WatchDog(threading.Thread):
         return code, current
 
     def parseLine(self, alllines):
+        hasMsg = False
         try:
             for line in alllines:
                 if self.url_type == 'sina':
@@ -109,11 +130,17 @@ class WatchDog(threading.Thread):
         s = requests.Session()
         while True:
             try:
+                self.readConfFromRedis()
+                self.prepareURL()
+                if len(self.code) == 0:
+                    time.sleep(60)
+                    continue
+
                 r = s.get(self.url)
                 # last line is empty line
                 alllines = r.text.encode("utf-8").split(';')[:-1]
                 self.parseLine(alllines)
-                time.sleep(3)
+                time.sleep(30)
             except Exception, e:
                 print "WatchDog error %s" %(str(e))
                 time.sleep(3)

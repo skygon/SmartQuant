@@ -33,7 +33,7 @@ class Pusher(threading.Thread):
     def handleCrashMsg(self):
         try:
             code = self.data[1]
-            msg = "CRASH --> [%s]" %(code)
+            msg = "*** CRASH --> [%s] ***" %(code)
             return msg
         except Exception, e:
             msg = "handleCrashMsg failed"
