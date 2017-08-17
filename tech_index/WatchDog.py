@@ -20,7 +20,7 @@ class WatchDog(threading.Thread):
         self.per = {}
         self.code = []
         self.conf_file = os.path.join(os.getcwd(), 'config', 'watchdog.json')
-        self.redis = RedisOperator("127.0.0.1.", 6379, 0)
+        self.redis = RedisOperator("127.0.0.1", 6379, 0)
         self.readConfFile()
         self.prepareURL()
         #self.readConfFromRedis()
@@ -35,7 +35,6 @@ class WatchDog(threading.Thread):
                 self.per[k]['c'] = 1.0
                 self.per[k]['b'] = 1.0
                 self.redis.hsetJson(self.table, k, v)
-                #v['bottom'] = v['bottom'] * 0.98
             print self.conf
         except Exception, e:
             print "readConfFile failed %s" %(str(e))
@@ -48,9 +47,9 @@ class WatchDog(threading.Thread):
             #print "conf has keys: %s" %(keys)
             for k in keys:
                 self.code.append(k)
-                strv = self.redis.hget(self.table, k)
-                v = json.loads(strv)
-                self.conf[k] = v
+                #strv = self.redis.hget(self.table, k)
+                #v = json.loads(strv)
+                #self.conf[k] = v
             #print self.conf
         except Exception, e:
             print "read conf from redis failed -> %s" %(str(e))
@@ -64,8 +63,8 @@ class WatchDog(threading.Thread):
         #print "watch dog index url is %s" %(self.url)
     
     def getMsg(self, code, current, per1, per2):
-        msg = "monitor:[%s] IN (%s, %s). Price is %s" %(code, per1, per2, current)
-        print msg
+        msg = "[%s] IN (%s, %s). Price is %s" %(code, per1, per2, current)
+        #print msg
         return msg
 
     def parseLineSina(self, line):
@@ -90,7 +89,7 @@ class WatchDog(threading.Thread):
         return code, current
 
     def parseLine(self, alllines):
-        hasMsg = False
+        msg = ""
         try:
             for line in alllines:
                 if self.url_type == 'sina':
@@ -108,8 +107,7 @@ class WatchDog(threading.Thread):
                     self.conf[code]['bottom'] = round(self.conf[code]['keep'] * self.per[code]['b'] ,2)
                     self.conf[code]['ceilling'] = round(self.conf[code]['keep'] * self.per[code]['c'] ,2)
 
-                    msg = self.getMsg(code, current, self.per[code]['b'], self.per[code]['c'])
-                    g_utils.msg_queue.put(msg)
+                    msg = self.getMsg(code, current, self.per[code]['b'], self.per[code]['c']) + "||"
                     
                 elif current < self.conf[code]['bottom']:
                     while self.per[code]['b'] * self.conf[code]['keep'] > current:
@@ -119,7 +117,10 @@ class WatchDog(threading.Thread):
                     self.conf[code]['ceilling'] = round(self.conf[code]['keep'] * self.per[code]['c'] , 2)
                     self.conf[code]['bottom'] = round(self.conf[code]['keep'] * self.per[code]['b'] , 2)
 
-                    msg = self.getMsg(code, current, self.per[code]['b'], self.per[code]['c'])
+                    msg = self.getMsg(code, current, self.per[code]['b'], self.per[code]['c']) + "||"
+                
+                if len(msg) > 0:
+                    print msg
                     g_utils.msg_queue.put(msg)
                     
 
@@ -140,7 +141,7 @@ class WatchDog(threading.Thread):
                 # last line is empty line
                 alllines = r.text.encode("utf-8").split(';')[:-1]
                 self.parseLine(alllines)
-                time.sleep(30)
+                time.sleep(60)
             except Exception, e:
                 print "WatchDog error %s" %(str(e))
                 time.sleep(3)
