@@ -195,10 +195,10 @@ def start_monitor():
     wd = WatchDog()
     wd.start()
 
-    # watchers = []
-    # for i in range(200):
-    #     w = Watcher()
-    #     watchers.append(w)
+    watchers = []
+    for i in range(200):
+        w = Watcher()
+        watchers.append(w)
     
     while True:
         print "=============================================="

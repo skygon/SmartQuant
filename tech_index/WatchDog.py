@@ -20,7 +20,7 @@ class WatchDog(threading.Thread):
         self.per = {}
         self.code = []
         self.conf_file = os.path.join(os.getcwd(), 'config', 'watchdog.json')
-        self.redis = RedisOperator("localhost", 6379, 0)
+        self.redis = RedisOperator("127.0.0.1.", 6379, 0)
         self.readConfFile()
         self.prepareURL()
         #self.readConfFromRedis()
