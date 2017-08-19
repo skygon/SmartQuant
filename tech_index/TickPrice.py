@@ -62,7 +62,8 @@ class TickPrice(VolumeBase):
         self.close = [] if df.empty else self.df.close.values
         self.tick = [] if df.empty else self.df.date.values
 
-    def findCrash(self):
+    # Currnetly, we only have the 5 min tick data. So there are 48 ticks in one day
+    def findCrash_5(self):
         for i in range(len(self.tick)):
             h = self.high[i]
             l = self.low[i]
@@ -70,10 +71,27 @@ class TickPrice(VolumeBase):
             c = self.close[i]
             if h == 0:
                 return
+            if l / h <= 0.97 and o >= c:
+                print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
+                return
+    
+    def findCrash_10(self):
+        for i in range(0,len(self.tick),2):
+            h = max(self.high[i], self.high[i+1])
+            l = min(self.low[i], self.low[i+1])
+            o = self.open[i]
+            c = self.close[i+1]
+            if h == 0:
+                return
             if l / h <= 0.96 and o >= c:
                 print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
                 return
-
+    
+    def findCrash(self, type=5):
+        if type == 5:
+            self.findCrash_5()
+        elif type == 10:
+            self.findCrash_10()
         
     def getSummary(self):
         self.date = self.df.date.values
@@ -146,13 +164,13 @@ class TickPrice(VolumeBase):
 
 
 def monitor():
-    t = TickPrice('2017-08-17')
+    t = TickPrice('2017-08-16')
     while True:
         try:
             c = g_utils.full_queue.get(False)
             t.setCode(c)
             t.prepareDataFromDisk()
-            t.findCrash()
+            t.findCrash(10)
         except Queue.Empty:
             break
         except Exception,e:

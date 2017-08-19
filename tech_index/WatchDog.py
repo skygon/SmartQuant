@@ -50,7 +50,7 @@ class WatchDog(threading.Thread):
                 #strv = self.redis.hget(self.table, k)
                 #v = json.loads(strv)
                 #self.conf[k] = v
-            #print self.conf
+            print "=== I would watch %s ===" %(self.code)
         except Exception, e:
             print "read conf from redis failed -> %s" %(str(e))
 
@@ -89,7 +89,6 @@ class WatchDog(threading.Thread):
         return code, current
 
     def parseLine(self, alllines):
-        msg = ""
         try:
             for line in alllines:
                 if self.url_type == 'sina':
@@ -107,7 +106,8 @@ class WatchDog(threading.Thread):
                     self.conf[code]['bottom'] = round(self.conf[code]['keep'] * self.per[code]['b'] ,2)
                     self.conf[code]['ceilling'] = round(self.conf[code]['keep'] * self.per[code]['c'] ,2)
 
-                    msg = self.getMsg(code, current, self.per[code]['b'], self.per[code]['c']) + "||"
+                    msg = self.getMsg(code, current, self.per[code]['b'], self.per[code]['c'])
+                    g_utils.msg_queue.put(msg)
                     
                 elif current < self.conf[code]['bottom']:
                     while self.per[code]['b'] * self.conf[code]['keep'] > current:
@@ -117,12 +117,10 @@ class WatchDog(threading.Thread):
                     self.conf[code]['ceilling'] = round(self.conf[code]['keep'] * self.per[code]['c'] , 2)
                     self.conf[code]['bottom'] = round(self.conf[code]['keep'] * self.per[code]['b'] , 2)
 
-                    msg = self.getMsg(code, current, self.per[code]['b'], self.per[code]['c']) + "||"
-                
-                if len(msg) > 0:
-                    print msg
-                    g_utils.msg_queue.put(msg)
-                    
+                    msg = self.getMsg(code, current, self.per[code]['b'], self.per[code]['c'])
+                    g_utils.msg_queue.put(msg) 
+
+                #print "[%s] ceilling: %s, bottom: %s" %(code, self.conf[code]['ceilling'], self.conf[code]['bottom'])  
 
         except Exception, e:
             print "parse line failed %s" %(str(e))
