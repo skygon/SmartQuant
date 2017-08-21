@@ -33,10 +33,10 @@ class Watcher(threading.Thread):
         self.enter_max = 1.02
         self.enter_min = 0.98
         self.confirm = 0.97
-        self.sleep = 1 # sleep seconds
+        self.sleep = 3 # sleep seconds
         self.flash_time = 210 # flash crash must happen in xxx seconds. Best practice: 3 - 4 mins
         self.total_ticks = 0
-        self.init_ticks = self.flash_time / (self.sleep * 2)
+        self.init_ticks = self.flash_time / (self.sleep)
         self.hist_day_path = os.path.join(os.getcwd(), 'hist_data', 'day')
         self.indicate = True
         self.show = 0
@@ -83,6 +83,7 @@ class Watcher(threading.Thread):
                 self.conf[c]['ticks'] = []
                 self.conf[c]['send'] = False
                 self.conf[c]['count'] = 0
+                self.conf[c]['log'] = 0
                 self.code.append(c)
                 self.base_len += 1
         except Queue.Empty:
@@ -138,7 +139,10 @@ class Watcher(threading.Thread):
                 index = self.total_ticks % self.init_ticks
                 p = self.conf[code]['ticks'][index]
                 if p == 0:
-                    print "Get zero from code[%s]. Check this please." %(code)
+                    if self.conf[code]['log'] >= 50:
+                        print "Get zero from code[%s]. Check this please." %(code)
+                        self.conf[code]['log'] = 0
+                    self.conf[code]['log'] += 1
                     continue
                 
                 if current / p <= self.confirm:
@@ -148,6 +152,10 @@ class Watcher(threading.Thread):
                         g_utils.msg_queue.put(msg)
                         self.conf[code]['send'] = True
                         self.conf[code]['count'] = 0
+                elif current / p <= 0.975:
+                    print "=-=-= 2.5 backup : [%s] =-=-=" %(code)
+                elif current / p <= 0.98:
+                    print "=*=*= 2.0 backup : [%s] =*=*=" %(code)
                 
                 self.conf[code]['count'] += 1    
                 if self.conf[code]['count'] >= 50:
@@ -192,8 +200,8 @@ def start_monitor():
     p = Pusher({})
     p.start()
 
-    wd = WatchDog()
-    wd.start()
+    #wd = WatchDog()
+    #wd.start()
 
     watchers = []
     for i in range(200):

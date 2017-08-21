@@ -160,6 +160,7 @@ class Utils(object):
         return que1
 
 g_utils = Utils()
+g_utils2 = Utils()
 
 # ==========================
 def put2MsgQue(msg):

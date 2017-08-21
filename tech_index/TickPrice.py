@@ -162,8 +162,7 @@ class TickPrice(VolumeBase):
         print "==== accept because no down count: %s" %(self.accept_no_down_count)
         print "==== stock pool : %s" %(self.stock_pool)
 
-
-def monitor():
+def crash_monitor():
     t = TickPrice('2017-08-16')
     while True:
         try:
@@ -176,11 +175,7 @@ def monitor():
         except Exception,e:
             print "monitor error %s" %(str(e))
 
+
 if __name__ == "__main__":
-    monitor()
-    # t = TickPrice('2017-08-09')
-    # t.setCode('603993')
-    # t.prepareDataFromDisk()
-    # print t.df
-    # t.getSummary()
+    crash_monitor()
     
