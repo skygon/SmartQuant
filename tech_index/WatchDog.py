@@ -18,6 +18,7 @@ class WatchDog(threading.Thread):
         self.url_type = 'sina'
         self.table = "watch_table"
         self.watch_conf = 'watch_conf'
+        self.prefix = "monitor:"
         self.delta = 0.005
         self.per = {}
         self.code = []
@@ -66,7 +67,7 @@ class WatchDog(threading.Thread):
         #print "watch dog index url is %s" %(self.url)
     
     def getMsg(self, code, current, per1, per2):
-        msg = "[%s] IN (%s, %s). Price is %s" %(code, per1, per2, current)
+        msg = self.prefix + "[%s] IN (%s, %s). Price is %s" %(code, per1, per2, current)
         print msg
         return msg
 

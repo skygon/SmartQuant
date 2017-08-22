@@ -199,8 +199,8 @@ def start_monitor():
     p = Pusher({})
     p.start()
 
-    #wd = WatchDog()
-    #wd.start()
+    wd = WatchDog()
+    wd.start()
 
     watchers = []
     for i in range(200):
