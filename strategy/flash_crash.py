@@ -23,6 +23,7 @@ from utils import *
 # 排除crash时跌幅太大的股票，比如超过8%，可能会到跌停板
 # 不要重复发送。发送一次后，记录ticks， 到达一定的ticks后才能再次发送
 # 日志的控制开关放到redis中
+# 从热门板块中挑选crash
 
 class Watcher(threading.Thread):
     def __init__(self):
