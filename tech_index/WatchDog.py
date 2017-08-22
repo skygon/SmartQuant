@@ -17,6 +17,8 @@ class WatchDog(threading.Thread):
         super(WatchDog, self).__init__()
         self.url_type = 'sina'
         self.table = "watch_table"
+        self.watch_conf = 'watch_conf'
+        self.delta = 0.005
         self.per = {}
         self.code = []
         self.conf_file = os.path.join(os.getcwd(), 'config', 'watchdog.json')
@@ -35,6 +37,7 @@ class WatchDog(threading.Thread):
                 self.per[k]['c'] = 1.0
                 self.per[k]['b'] = 1.0
                 self.redis.hsetJson(self.table, k, v)
+            self.redis.hset(self.watch_conf, 'watch', 'off')
             print self.conf
         except Exception, e:
             print "readConfFile failed %s" %(str(e))
@@ -50,7 +53,7 @@ class WatchDog(threading.Thread):
                 #strv = self.redis.hget(self.table, k)
                 #v = json.loads(strv)
                 #self.conf[k] = v
-            print "=== I would watch %s ===" %(self.code)
+            self.watch = self.redis.hget(self.watch_conf,'watch')
         except Exception, e:
             print "read conf from redis failed -> %s" %(str(e))
 
@@ -64,7 +67,7 @@ class WatchDog(threading.Thread):
     
     def getMsg(self, code, current, per1, per2):
         msg = "[%s] IN (%s, %s). Price is %s" %(code, per1, per2, current)
-        #print msg
+        print msg
         return msg
 
     def parseLineSina(self, line):
@@ -96,7 +99,7 @@ class WatchDog(threading.Thread):
                 elif self.url_type == 'tx':
                     code, current, op = self.parseLineTx(line)
                 
-                if current > self.conf[code]['ceilling']:
+                if current > self.conf[code]['ceilling'] * (1 + self.delta):
                     # adjust box ceilling and bottom percentage
                     while self.per[code]['c'] * self.conf[code]['keep'] < current:
                         self.per[code]['b'] = self.per[code]['c']
@@ -109,7 +112,7 @@ class WatchDog(threading.Thread):
                     msg = self.getMsg(code, current, self.per[code]['b'], self.per[code]['c'])
                     g_utils.msg_queue.put(msg)
                     
-                elif current < self.conf[code]['bottom']:
+                elif current < self.conf[code]['bottom'] * (1 - self.delta):
                     while self.per[code]['b'] * self.conf[code]['keep'] > current:
                         self.per[code]['c'] = self.per[code]['b']
                         self.per[code]['b'] -= 0.01
@@ -118,7 +121,7 @@ class WatchDog(threading.Thread):
                     self.conf[code]['bottom'] = round(self.conf[code]['keep'] * self.per[code]['b'] , 2)
 
                     msg = self.getMsg(code, current, self.per[code]['b'], self.per[code]['c'])
-                    g_utils.msg_queue.put(msg) 
+                    g_utils.msg_queue.put(msg)
 
                 #print "[%s] ceilling: %s, bottom: %s" %(code, self.conf[code]['ceilling'], self.conf[code]['bottom'])  
 
@@ -130,6 +133,10 @@ class WatchDog(threading.Thread):
         while True:
             try:
                 self.readConfFromRedis()
+                if self.watch == 'off':
+                    print "Watch off."
+                    time.sleep(10)
+                    continue
                 self.prepareURL()
                 if len(self.code) == 0:
                     time.sleep(60)

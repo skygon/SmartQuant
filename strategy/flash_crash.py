@@ -20,10 +20,9 @@ from utils import *
 
 
 # TODO
-# 比较两个源的刷新频率
-# 如果6秒刷新一次，那么请求的时间间隔要控制好，太快和太慢都会有问题
 # 排除crash时跌幅太大的股票，比如超过8%，可能会到跌停板
 # 不要重复发送。发送一次后，记录ticks， 到达一定的ticks后才能再次发送
+# 日志的控制开关放到redis中
 
 class Watcher(threading.Thread):
     def __init__(self):
@@ -33,7 +32,7 @@ class Watcher(threading.Thread):
         self.enter_max = 1.02
         self.enter_min = 0.98
         self.confirm = 0.97
-        self.sleep = 3 # sleep seconds
+        self.sleep = 2 # sleep seconds
         self.flash_time = 210 # flash crash must happen in xxx seconds. Best practice: 3 - 4 mins
         self.total_ticks = 0
         self.init_ticks = self.flash_time / (self.sleep)
