@@ -24,6 +24,7 @@ from utils import *
 # 不要重复发送。发送一次后，记录ticks， 到达一定的ticks后才能再次发送
 # 日志的控制开关放到redis中
 # 从热门板块中挑选crash. 热门板块是动态变化的，需要每隔一段时间获取新的热门板块
+## http://quote.eastmoney.com/center/BKList.html#trade_0_0?sortRule=0
 
 class Watcher(threading.Thread):
     def __init__(self):
