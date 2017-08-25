@@ -5,7 +5,7 @@ from pandas import DataFrame
 debug = True
 day_array = ['one', 'two', 'three', 'four']
 last_days = {}
-start_day = -4
+start_day = -16
 last_days['one'] = start_day+3
 last_days['two'] = start_day+2
 last_days['three'] = start_day+1
@@ -26,7 +26,7 @@ class Utils(object):
         # config files:
         self.sh_a = os.path.join(self.cfg_path, 'sh_a.txt')
         self.sz_a = os.path.join(self.cfg_path, 'sz_a.txt')
-        
+        self.hot_codes = []
         # full queue from today_all, latest data
         self.full_queue = self.getFullQueIns()
         self.sz50_que = self.getSZ50QueueIns()

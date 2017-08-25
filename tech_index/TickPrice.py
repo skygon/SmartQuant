@@ -3,10 +3,12 @@ import os
 import sys
 from pandas import DataFrame
 sys.path.append(os.getcwd())
+sys.path.append(os.path.join(os.getcwd(), 'information_service'))
 from ts_wrapper import TsWrapper
 from utils import *
 from RealTimeDataAcq import RTDA
 from VolumeBase import VolumeBase
+from hot_industry import HotIndustry
 
 
 class TickPrice(VolumeBase):
@@ -16,6 +18,7 @@ class TickPrice(VolumeBase):
         # override base class
         self.current_date = date_str
         self.tick_data_path = os.path.join(os.getcwd(), 'tick_data')
+        self.hist_day_path = os.path.join(os.getcwd(), 'hist_data', 'day')
         self.up = {}
         self.down = {}
         # for strategy statistic
@@ -48,6 +51,65 @@ class TickPrice(VolumeBase):
         f = os.path.join(self.tick_data_path, file_name)
         self.df.to_csv(f)
     
+    def getSettlement(self):
+        try:
+            file_name = self.code + '_hist_d.csv'
+            full_path = os.path.join(self.hist_day_path, file_name)
+            df = DataFrame.from_csv(full_path)
+            close = df.close.values
+            if len(close) < 100:
+                return 0
+            self.settlement = close[last_days['two']]
+            return close[last_days['two']]
+        except Exception, e:
+            print "getSettlement faield %s" %(str(e))
+
+
+    def findDownBoard(self):
+        try:
+            board_price = self.settlement * 0.905
+            board = False
+            if len(self.tick) == 0:
+                return
+            
+            for i in range(len(self.tick)):
+                h = self.high[i]
+                l = self.low[i]
+                o = self.open[i]
+                c = self.close[i]
+                if board:
+                    if l > board_price:
+                        print "**** [%s] open board at %s ****" %(self.code, self.tick[i])
+                        return
+                elif h == l and c <= board_price:
+                    print "[%s] on board" %(self.code)
+                    board = True
+        except Exception, e:
+            print "find open board failed %s" %(str(e))
+
+    def findOpenBoard(self):
+        try:
+            board_price = self.settlement * 1.1
+            board = False
+            if len(self.tick) == 0:
+                return
+            
+            for i in range(len(self.tick)):
+                h = self.high[i]
+                l = self.low[i]
+                o = self.open[i]
+                c = self.close[i]
+                if board:
+                    if l < board_price:
+                        print "**** [%s] open board at %s ****" %(self.code, self.tick[i])
+                        return
+                elif h == l and c >= board_price:
+                    #print "[%s] on board" %(self.code)
+                    board = True
+        except Exception, e:
+            print "find open board failed %s" %(str(e))
+
+
     def prepareDataFromDisk(self):
         file_name = self.code + ".csv"
         f = os.path.join(self.tick_data_path, file_name)
@@ -75,11 +137,14 @@ class TickPrice(VolumeBase):
             if h == 0:
                 return
 
-            if float(o) / th > 1.02 or float(o) / th < 0.98:
-                return
+            #if float(o) / th > 1.02 or float(o) / th < 0.98:
+            #    return
 
             if l / h <= 0.97 and o >= c:
-                print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
+                if self.code in g_utils.hot_codes:
+                    print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
+                else:
+                    print "++++ find code[%s] crash. But not in hot industry ++++" %(self.code)    
                 return
             
     def getSummary(self):
@@ -152,7 +217,11 @@ class TickPrice(VolumeBase):
         print "==== stock pool : %s" %(self.stock_pool)
 
 def crash_monitor():
-    t = TickPrice('2017-08-16')
+    hi = HotIndustry()
+    hi.oneTimeRun()
+
+    t = TickPrice('2017-08-24')
+    print "TickPrice: hot codes -> %s" %(g_utils.hot_codes)
     while True:
         try:
             c = g_utils.full_queue.get(False)
@@ -165,6 +234,27 @@ def crash_monitor():
             print "monitor error %s" %(str(e))
 
 
+def open_board():
+    t = TickPrice(last_days['one'])
+    t.getCurrentDate()
+    print t.current_date
+    while True:
+        try:
+            c = g_utils.full_queue.get(False)
+            t.setCode(c)
+            st = t.getSettlement()
+            #print "[%s] settlement: %s" %(t.code, st)
+            if st == 0:
+                continue
+            t.prepareDataFromDisk()
+            #t.findOpenBoard()
+            t.findDownBoard()
+        except Queue.Empty:
+            break
+        except Exception,e:
+            print "monitor error %s" %(str(e))
+
 if __name__ == "__main__":
     crash_monitor()
+    #open_board()
     
