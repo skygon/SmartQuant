@@ -18,51 +18,60 @@ class HotIndustry(threading.Thread):
         # rest apis BK example: C.BK04741 <- C.{BK0474}1
         self.base_url = "http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=C._BKHY&sty=FPGBKI&st=c&sr=-1&p=1&ps=5000&cb=&js=var%20BKCache=[(x)]&token=%s&v=0.4666060520101798"
         
-        self.industry_url = "http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=%s&sty=FCOIATA&sortType=C&sortRule=-1&page=1&pageSize=20&js=var%20quote_123%3d{rank:[(x)],pages:(pc)}&token=%s&jsName=quote_123&_g=0.2427368205033993"
+        self.industry_url = "http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?type=CT&cmd=%s&sty=FCOIATA&sortType=C&sortRule=-1&page=%s&pageSize=20&js=var%20quote_123%3d{rank:[(x)],pages:(pc)}&token=%s&jsName=quote_123&_g=0.2427368205033993"
 
     # 筛选涨幅大于1%的个股，目前只拿第一页的数据
-    def getCode(self, bk):
+    def getCode(self, bk, oneTimeRun=False):
         try:
-            url = urllib2.unquote(self.industry_url).decode('utf8')
-            url = url %(bk, self.token)
+            page = 1
+            pages = 1
+            while (page <= pages):
+                #print "current page: %s" %(page)
+                url = urllib2.unquote(self.industry_url).decode('utf8')
+                url = url %(bk, str(page), self.token)
+                r = self.session.get(url)
+                rs = r.text.encode('utf-8').split('=')[1]
 
-            r = self.session.get(url)
-            rs = r.text.encode('utf-8').split('=')[1]
+                rs = rs.replace('rank', '"rank"')
+                rs = rs.replace('pages', '"pages"')
+                data = json.loads(rs)
+                pages = int(data['pages'])
+                #print "total pages: %s" %(pages)
+                lines = data['rank']
+                for l in lines:
+                    s = l.encode('utf-8')
+                    s_arr = s.split(',')
+                    code = s_arr[1]
+                    if oneTimeRun is False:
+                        if code.find("60") == 0:
+                            code = "sh" + code
+                        else:
+                            code = "sz" + code
+                    
+                    if s_arr[9] == '-' or s_arr[4] == '-':
+                        continue
 
-            rs = rs.replace('rank', '"rank"')
-            rs = rs.replace('pages', '"pages"')
-            data = json.loads(rs)
-            #print data
-            lines = data['rank']
-            for l in lines:
-                s = l.encode('utf-8')
-                s_arr = s.split(',')
-                code = s_arr[1]
-                if code.find("60") == 0:
-                    code = "sh" + code
-                else:
-                    code = "sz" + code
-                
-                settlement = float(s_arr[9])
-                if settlement == 0 or float(s_arr[10]) == 0:
-                    continue
+                    settlement = float(s_arr[9])
+                    if settlement == 0 or float(s_arr[10]) == 0:
+                        continue
 
-                change = float(s_arr[4])
-                per_change = s_arr[5]
+                    change = float(s_arr[4])
+                    per_change = s_arr[5]
 
 
-                if change / settlement > 0.01:
-                    print "%s -> %s | %s -> %s" %(code, settlement, change, per_change)
-                    self.hot_codes.append(code)
-
+                    if change / settlement > 0.0:
+                        #print "%s -> %s | %s -> %s" %(code, settlement, change, per_change)
+                        self.hot_codes.append(code)
+                page += 1
         except Exception, e:
-            print "hot industry get code failed %s for %s" %(str(e))
+            print "hot industry get code failed %s" %(str(e))
 
     # 取前10个热门行业。涨幅小于0时返回
-    def parseLine(self, s):
+    def parseLine(self, s, oneTimeRun=False):
         try:
             rs = s.split(',"')
             for r in rs[:10]:
+                print "======="
                 t = r.split(',')
                 cat = t[1]
                 change = float(t[3])
@@ -70,7 +79,7 @@ class HotIndustry(threading.Thread):
                     return
                 print cat
                 bk = "C." + cat + "1"
-                self.getCode(bk)
+                self.getCode(bk, oneTimeRun)
         except Exception, e:
             print "hot industry parse line failed %s" %(str(e))
 
@@ -84,7 +93,7 @@ class HotIndustry(threading.Thread):
 
                 r = self.session.get(url)
                 rs = r.text.encode('utf-8').split('=')[1]
-                self.parseLine(rs)
+                self.parseLine(rs, True)
                 g_utils.hot_codes = self.hot_codes
                 print "hot codes: %s" %(g_utils.hot_codes)
                 break # !!! change to time sleep for real
@@ -104,11 +113,12 @@ class HotIndustry(threading.Thread):
 
                 r = self.session.get(url)
                 rs = r.text.encode('utf-8').split('=')[1]
+                #print rs
                 self.parseLine(rs)
                 g_utils.hot_codes = self.hot_codes
                 print "hot codes: %s" %(g_utils.hot_codes)
-                #break # !!! change to time sleep for real
-                time.sleep(5) # refresh every 10 min
+                break # !!! change to time sleep for real
+                #time.sleep(5) # refresh every 10 min
             except Exception ,e:
                 print "hot industry failed : %s" %(str(e))
                 time.sleep(30)

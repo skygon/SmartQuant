@@ -145,7 +145,7 @@ class TickPrice(VolumeBase):
                     print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
                 else:
                     print "++++ find code[%s] crash. But not in hot industry ++++" %(self.code)    
-                return
+                return self.code, l
             
     def getSummary(self):
         self.date = self.df.date.values
@@ -220,7 +220,7 @@ def crash_monitor():
     hi = HotIndustry()
     hi.oneTimeRun()
 
-    t = TickPrice('2017-08-24')
+    t = TickPrice('2017-08-25')
     print "TickPrice: hot codes -> %s" %(g_utils.hot_codes)
     while True:
         try:
