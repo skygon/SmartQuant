@@ -51,6 +51,22 @@ class TickPrice(VolumeBase):
         f = os.path.join(self.tick_data_path, file_name)
         self.df.to_csv(f)
     
+    def getNextDayInfo(self):
+        try:
+            file_name = self.code + '_hist_d.csv'
+            full_path = os.path.join(self.hist_day_path, file_name)
+            df = DataFrame.from_csv(full_path)
+            close = df.close.values
+            high = df.high.values
+            date = df.date.values
+            if len(date) < 100:
+                return None, None
+            #print "next date : %s" %(date[last_days['one']+1])
+            return close[last_days['one']+1], high[last_days['one']+1]
+            
+        except Exception, e:
+            print "get next day info failed %s" %(str(e))
+
     def getSettlement(self):
         try:
             file_name = self.code + '_hist_d.csv'
@@ -126,26 +142,31 @@ class TickPrice(VolumeBase):
 
     # Currnetly, we only have the 5 min tick data. So there are 48 ticks in one day
     def findCrash(self):
-        if len(self.tick) == 0:
-            return
-        th = self.open[0]
-        for i in range(len(self.tick)):
-            h = self.high[i]
-            l = self.low[i]
-            o = self.open[i]
-            c = self.close[i]
-            if h == 0:
-                return
+        try:
+            if len(self.tick) == 0:
+                return None, None, None
+            th = self.open[0]
+            for i in range(len(self.tick)):
+                h = self.high[i]
+                l = self.low[i]
+                o = self.open[i]
+                c = self.close[i]
+                if h == 0:
+                    return None, None, None
 
-            #if float(o) / th > 1.02 or float(o) / th < 0.98:
-            #    return
+                #if float(o) / th > 1.02 or float(o) / th < 0.98:
+                #    return
 
-            if l / h <= 0.97 and o >= c:
-                if self.code in g_utils.hot_codes:
-                    print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
-                else:
-                    print "++++ find code[%s] crash. But not in hot industry ++++" %(self.code)    
-                return self.code, l
+                if l / h <= 0.97 and o >= c:
+                    # if self.code in g_utils.hot_codes:
+                    #     print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
+                    # else:
+                    #     print "++++ find code[%s] crash. But not in hot industry ++++" %(self.code)    
+                    return self.code, l, self.tick[i]
+
+            return None, None, None
+        except Exception, e:
+            print "find crash failed %s" %(str(e))
             
     def getSummary(self):
         self.date = self.df.date.values
