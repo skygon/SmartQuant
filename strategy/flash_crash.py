@@ -38,10 +38,10 @@ class Watcher(threading.Thread):
         self.flash_time = {} # flash crash must happen in xxx seconds. Best practice: 3 - 4 mins
         self.total_ticks = {}
         self.init_ticks = {}
-        self.initIntervals()
         self.hist_day_path = os.path.join(os.getcwd(), 'hist_data', 'day')
-        self.indicate = True
+        self.indicate = {}
         self.show = 0
+        self.initIntervals()
 
         self.initCodeBase()
         print "I have code base %s" %(self.code)
@@ -61,6 +61,8 @@ class Watcher(threading.Thread):
 
             for k, v in self.flash_time.items():
                 self.init_ticks[k] = v / self.sleep
+                self.indicate[k] = True
+            print self.init_ticks
         except Exception, e:
             print "init intervals failed: %s" %(str(e))
 
@@ -141,9 +143,9 @@ class Watcher(threading.Thread):
     def parseLineByMin(self, k, code, settlement, current, op):
         if self.total_ticks[k] < self.init_ticks[k]:
             self.conf[code][k]['ticks'].append(current)
-            continue
+            return
         if settlement == 0 or current == 0:
-            continue
+            return
 
         #if current / settlement <= self.enter_max and current / settlement >= self.enter_min:
         index = self.total_ticks[k] % self.init_ticks[k]
@@ -153,7 +155,7 @@ class Watcher(threading.Thread):
                 print "Get zero from code[%s]. Check this please." %(code)
                 self.conf[code][k]['log'] = 0
             self.conf[code][k]['log'] += 1
-            continue
+            return
         
         if current / p <= self.confirm:
             if self.conf[code][k]['send'] is False:
@@ -257,10 +259,11 @@ class Watcher(threading.Thread):
                 time.sleep(self.sleep)
 
                 end = time.time()
-                if (self.total_ticks >= self.init_ticks or (int)(end - start) > self.flash_time) and self.indicate:
-                    self.indicate = False
-                    self.init_ticks = self.total_ticks
-                    print "Collect init ticks[%s] cost %s seconds" %(self.total_ticks, (end-start))
+                for k in self.flash_time.keys():
+                    if (self.total_ticks[k] >= self.init_ticks[k] or (int)(end - start) > self.flash_time[k]) and self.indicate[k]:
+                        self.indicate[k] = False
+                        self.init_ticks[k] = self.total_ticks[k]
+                        print "Collect init ticks[%s] cost %s seconds" %(self.total_ticks[k], (end-start))
             except Exception, e:
                 print "Watcher error: %s" %(str(e))
                 time.sleep(2)
@@ -271,21 +274,21 @@ def start_monitor():
     p = Pusher({})
     p.start()
 
-    wd = WatchDog()
-    wd.start()
+    #wd = WatchDog()
+    #wd.start()
 
-    #watchers = []
-    #for i in range(200):
-    #    w = Watcher()
-    #    watchers.append(w)
+    watchers = []
+    for i in range(200):
+        w = Watcher()
+        watchers.append(w)
     
     while True:
         print "=============================================="
         time.sleep(10)
 
 if __name__ == "__main__":
-    start_monitor()
+    #start_monitor()
     #  p = Pusher({})
     #  p.start()
-    #  w = Watcher()
-    #  w.join()
+    w = Watcher()
+    w.join()
