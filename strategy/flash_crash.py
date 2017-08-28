@@ -157,7 +157,7 @@ class Watcher(threading.Thread):
         
         if current / p <= self.confirm:
             if self.conf[code][k]['send'] is False:
-                msg = "crash:%s" %(code)
+                msg = "crash:%s##%s" %(code, k)
                 print msg
                 g_utils.msg_queue.put(msg)
                 self.conf[code][k]['send'] = True
