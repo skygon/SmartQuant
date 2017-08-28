@@ -41,15 +41,6 @@ class TickPrice(VolumeBase):
         self.down['count'] = 0
         self.down['price'] = 0
         self.down['volume'] = 0
-
-    # override base class. And before invoke, must setCode
-    def prepareData(self):
-        df = self.ts.getTick5Data(self.code, self.current_date)
-        self.df = df[df.date.str.contains(self.current_date)]
-        # save to disk for cache and regression test
-        file_name = self.code + ".csv"
-        f = os.path.join(self.tick_data_path, file_name)
-        self.df.to_csv(f)
     
     def getNextDayInfo(self):
         try:
@@ -126,31 +117,52 @@ class TickPrice(VolumeBase):
             print "find open board failed %s" %(str(e))
 
 
-    def prepareDataFromDisk(self):
+    def prepareTickData(self):
         file_name = self.code + ".csv"
         f = os.path.join(self.tick_data_path, file_name)
         if os.path.isfile(f) is False:
             df = DataFrame()
         else:
             df = DataFrame.from_csv(f)
-        self.df = [] if df.empty else df[df.date.str.contains(self.current_date)]
-        self.high = [] if df.empty else self.df.high.values
-        self.low = [] if df.empty else self.df.low.values
-        self.open = [] if df.empty else self.df.open.values
-        self.close = [] if df.empty else self.df.close.values
-        self.tick = [] if df.empty else self.df.date.values
+        self.tick_df = [] if df.empty else df[df.date.str.contains(self.current_date)]
+        self.tick_high = [] if df.empty else self.tick_df.high.values
+        self.tick_low = [] if df.empty else self.tick_df.low.values
+        self.tick_open = [] if df.empty else self.tick_df.open.values
+        self.tick_close = [] if df.empty else self.tick_df.close.values
+        self.tick = [] if df.empty else self.tick_df.date.values
 
+    def getMA(self, days):
+        try:
+            start = last_days['one']
+            end = last_days['one'] - days
+            total = 0.0
+            for i in range(start, end, -1):
+                total += self.close[i]
+            ma = total / days
+            return ma
+        except Exception,e:
+            print "getMA failed %s" %(str(e))
     # Currnetly, we only have the 5 min tick data. So there are 48 ticks in one day
     def findCrash(self):
         try:
+            self.prepareData()
+            if len(self.date) < 100:
+                return
+
+            ma = self.getMA(15)
+            if self.low[last_days['one']] < ma:
+                return
+
             if len(self.tick) == 0:
                 return None, None, None
-            th = self.open[0]
+            th = self.tick_open[0]
+
+
             for i in range(len(self.tick)):
-                h = self.high[i]
-                l = self.low[i]
-                o = self.open[i]
-                c = self.close[i]
+                h = self.tick_high[i]
+                l = self.tick_low[i]
+                o = self.tick_open[i]
+                c = self.tick_close[i]
                 if h == 0:
                     return None, None, None
 
@@ -162,6 +174,7 @@ class TickPrice(VolumeBase):
                     #     print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
                     # else:
                     #     print "++++ find code[%s] crash. But not in hot industry ++++" %(self.code)    
+                    print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
                     return self.code, l, self.tick[i]
 
             return None, None, None
@@ -238,16 +251,18 @@ class TickPrice(VolumeBase):
         print "==== stock pool : %s" %(self.stock_pool)
 
 def crash_monitor():
-    hi = HotIndustry()
-    hi.oneTimeRun()
+    #hi = HotIndustry()
+    #hi.oneTimeRun()
 
-    t = TickPrice('2017-08-25')
-    print "TickPrice: hot codes -> %s" %(g_utils.hot_codes)
+    #t = TickPrice('2017-08-25')
+    t = TickPrice("")
+    t.getCurrentDate()
+    print t.current_date
     while True:
         try:
             c = g_utils.full_queue.get(False)
             t.setCode(c)
-            t.prepareDataFromDisk()
+            t.prepareTickData()
             t.findCrash()
         except Queue.Empty:
             break

@@ -27,6 +27,35 @@ class FlashCrashMock(TickPrice):
         self.start_index = -5
         self.days = 5
 
+    def findCrashMock(self):
+        try:
+            if len(self.tick) == 0:
+                return None, None, None
+            th = self.tick_open[0]
+
+
+            for i in range(len(self.tick)):
+                h = self.tick_high[i]
+                l = self.tick_low[i]
+                o = self.tick_open[i]
+                c = self.tick_close[i]
+                if h == 0:
+                    return None, None, None
+
+                #if float(o) / th > 1.02 or float(o) / th < 0.98:
+                #    return
+
+                if l / h <= 0.97 and o >= c:
+                    # if self.code in g_utils.hot_codes:
+                    #     print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
+                    # else:
+                    #     print "++++ find code[%s] crash. But not in hot industry ++++" %(self.code)    
+                    return self.code, l, self.tick[i]
+
+            return None, None, None
+        except Exception, e:
+            print "find crash failed %s" %(str(e))
+    
     def getBestSet(self):
         for i in range(self.days):
             mock_full_queue = g_utils.getFullQueIns()
@@ -40,8 +69,8 @@ class FlashCrashMock(TickPrice):
                     if c.find('300') == 0:
                         continue
                     self.setCode(c)
-                    self.prepareDataFromDisk()
-                    code, l, tick = self.findCrash()
+                    self.prepareTickData()
+                    code, l, tick = self.findCrashMock()
                     if code is None:
                         continue
 
