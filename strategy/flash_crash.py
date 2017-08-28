@@ -35,9 +35,10 @@ class Watcher(threading.Thread):
         self.enter_min = 0.98
         self.confirm = 0.97
         self.sleep = 2 # sleep seconds
-        self.flash_time = 210 # flash crash must happen in xxx seconds. Best practice: 3 - 4 mins
-        self.total_ticks = 0
-        self.init_ticks = self.flash_time / (self.sleep)
+        self.flash_time = {} # flash crash must happen in xxx seconds. Best practice: 3 - 4 mins
+        self.total_ticks = {}
+        self.init_ticks = {}
+        self.initIntervals()
         self.hist_day_path = os.path.join(os.getcwd(), 'hist_data', 'day')
         self.indicate = True
         self.show = 0
@@ -47,7 +48,21 @@ class Watcher(threading.Thread):
         if self.base_len > 0:
             self.prepareURL()
             self.start()
+    
+    def initIntervals(self):
+        try:
+            self.flash_time['3'] = 3 * 60
+            self.flash_time['5'] = 5 * 60
+            self.flash_time['8'] = 8 * 60
+            
+            self.total_ticks['3'] = 0
+            self.total_ticks['5'] = 0
+            self.total_ticks['8'] = 0
 
+            for k, v in self.flash_time.items():
+                self.init_ticks[k] = v / self.sleep
+        except Exception, e:
+            print "init intervals failed: %s" %(str(e))
 
     def prepareData(self, code):
         file_name = code + '_hist_d.csv'
@@ -81,10 +96,12 @@ class Watcher(threading.Thread):
                 else:
                     c = "sz" + c
                 self.conf[c] = {}
-                self.conf[c]['ticks'] = []
-                self.conf[c]['send'] = False
-                self.conf[c]['count'] = 0
-                self.conf[c]['log'] = 0
+                for k in self.flash_time.keys():
+                    self.conf[c][k] = {}
+                    self.conf[c][k]['ticks'] = []
+                    self.conf[c][k]['send'] = False
+                    self.conf[c][k]['count'] = 0
+                    self.conf[c][k]['log'] = 0
                 self.code.append(c)
                 self.base_len += 1
         except Queue.Empty:
@@ -121,7 +138,60 @@ class Watcher(threading.Thread):
         op = float(a[5])
         return code, settlement, current, op
 
+    def parseLineByMin(self, k, code, settlement, current, op):
+        if self.total_ticks[k] < self.init_ticks[k]:
+            self.conf[code][k]['ticks'].append(current)
+            continue
+        if settlement == 0 or current == 0:
+            continue
+
+        #if current / settlement <= self.enter_max and current / settlement >= self.enter_min:
+        index = self.total_ticks[k] % self.init_ticks[k]
+        p = self.conf[code][k]['ticks'][index]
+        if p == 0:
+            if self.conf[code][k]['log'] >= 50:
+                print "Get zero from code[%s]. Check this please." %(code)
+                self.conf[code][k]['log'] = 0
+            self.conf[code][k]['log'] += 1
+            continue
+        
+        if current / p <= self.confirm:
+            if self.conf[code][k]['send'] is False:
+                msg = "crash:%s##%s" %(code, k)
+                print msg
+                g_utils.msg_queue.put(msg)
+                self.conf[code][k]['send'] = True
+                self.conf[code][k]['count'] = 0
+        elif current / p <= 0.975:
+            print "=-=-= 2.5 backup : [%s] =-=-=" %(code)
+        elif current / p <= 0.98:
+            print "=*=*= 2.0 backup : [%s] =*=*=" %(code)
+        
+        self.conf[code][k]['count'] += 1    
+        if self.conf[code][k]['count'] >= 30:
+            self.conf[code][k]['send'] = False
+            self.conf[code][k]['count'] = 0
+
+        # replace the init price
+        self.conf[code][k]['ticks'][index] = current
+    
+        self.total_ticks[k] += 1
+
     def parseLine(self, alllines):
+        try:
+            for line in alllines:
+                if self.url_type == 'sina':
+                    code, settlement, current, op = self.parseLineSina(line)
+                elif self.url_type == 'tx':
+                    code, settlement, current, op = self.parseLineTx(line)
+                
+                for k in self.flash_time.keys():
+                    self.parseLineByMin(k, code, settlement, current, op)
+        except Exception, e:
+            print "parseLine failed %s" %(str(e))
+
+
+    def parseLine__(self, alllines):
         try:
             for line in alllines:
                 if self.url_type == 'sina':
@@ -159,7 +229,7 @@ class Watcher(threading.Thread):
                     print "=*=*= 2.0 backup : [%s] =*=*=" %(code)
                 
                 self.conf[code]['count'] += 1    
-                if self.conf[code]['count'] >= 50:
+                if self.conf[code]['count'] >= 30:
                     self.conf[code]['send'] = False
                     self.conf[code]['count'] = 0
 
