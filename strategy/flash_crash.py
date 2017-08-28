@@ -265,6 +265,7 @@ class Watcher(threading.Thread):
                         self.indicate[k] = False
                         self.init_ticks[k] = self.total_ticks[k]
                         print "Type:%s -> Collect init ticks[%s] cost %s seconds" %(k, self.total_ticks[k], (end-start))
+                        print self.conf[self.code[0]][k]['ticks']
             except Exception, e:
                 print "Watcher error: %s" %(str(e))
                 time.sleep(2)
@@ -288,8 +289,8 @@ def start_monitor():
         time.sleep(10)
 
 if __name__ == "__main__":
-    #start_monitor()
-    #  p = Pusher({})
-    #  p.start()
-    w = Watcher()
-    w.join()
+    start_monitor()
+    # p = Pusher({})
+    # p.start()
+    # w = Watcher()
+    # w.join()
