@@ -189,7 +189,7 @@ class Watcher(threading.Thread):
                     self.parseLineByMin(k, code, settlement, current, op)
             for k in self.flash_time.keys():
                 self.total_ticks[k] += 1
-            print self.total_ticks
+            #print self.total_ticks
         except Exception, e:
             print "parseLine failed %s" %(str(e))
 
@@ -265,7 +265,7 @@ class Watcher(threading.Thread):
                         self.indicate[k] = False
                         self.init_ticks[k] = self.total_ticks[k]
                         print "Type:%s -> Collect init ticks[%s] cost %s seconds" %(k, self.total_ticks[k], (end-start))
-                        print self.conf[self.code[0]][k]['ticks']
+                        #print self.conf[self.code[0]][k]['ticks']
             except Exception, e:
                 print "Watcher error: %s" %(str(e))
                 time.sleep(2)
