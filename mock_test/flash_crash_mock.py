@@ -78,7 +78,7 @@ class FlashCrashMock(TickPrice):
                     close, high = self.getNextDayInfo()
                     if close is None:
                         continue
-                    if l / high < 0.97:
+                    if l / high < 0.95:
                         print "*** [%s][%s] can buy at price %s -> [%s] ***" %(tick, code, l, high)
                     
                 except Queue.Empty:
