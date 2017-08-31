@@ -149,9 +149,9 @@ class TickPrice(VolumeBase):
             if len(self.date) < 100:
                 return
 
-            ma = self.getMA(15)
-            if self.low[last_days['one']] < ma:
-                return
+            #ma = self.getMA(15)
+            #if self.low[last_days['one']] < ma:
+            #    return
 
             if len(self.tick) == 0:
                 return None, None, None
@@ -170,11 +170,11 @@ class TickPrice(VolumeBase):
                 #    return
 
                 if l / h <= 0.97 and o >= c:
-                    # if self.code in g_utils.hot_codes:
-                    #     print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
-                    # else:
-                    #     print "++++ find code[%s] crash. But not in hot industry ++++" %(self.code)    
-                    print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
+                    if self.code in g_utils.hot_codes:
+                        print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
+                    else:
+                        print "++++ find code[%s] crash. But not in hot industry ++++" %(self.code)    
+                    #print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
                     return self.code, l, self.tick[i]
 
             return None, None, None
@@ -251,12 +251,12 @@ class TickPrice(VolumeBase):
         print "==== stock pool : %s" %(self.stock_pool)
 
 def crash_monitor():
-    #hi = HotIndustry()
-    #hi.oneTimeRun()
+    hi = HotIndustry()
+    hi.oneTimeRun()
 
-    #t = TickPrice('2017-08-25')
-    t = TickPrice("")
-    t.getCurrentDate()
+    t = TickPrice('2017-08-29')
+    #t = TickPrice("")
+    #t.getCurrentDate()
     print t.current_date
     while True:
         try:
