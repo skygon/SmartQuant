@@ -174,7 +174,8 @@ class TickPrice(VolumeBase):
                         print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
                     else:
                         print "++++ find code[%s] crash. But not in hot industry ++++" %(self.code)    
-                    #print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
+                    #
+                    # print "**** code[%s] crash at %s -> open[%s], close[%s], high[%s], low[%s]****" %(self.code, self.tick[i], o, c, h, l)
                     return self.code, l, self.tick[i]
 
             return None, None, None
